@@ -262,6 +262,7 @@ class _TableCalendarScreenState extends State<App> {
                           builder: (context) => DetailPage(
                             schedule: schedule,
                             model: DetailPageModel(
+                              id: schedule["id"],
                               title: schedule["title"],
                               description: schedule["description"],
                               date: schedule["date"],
