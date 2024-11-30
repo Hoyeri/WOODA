@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/screens/detail_page.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _TableCalendarScreenState extends State<App> {
         .where((schedule) => isSameDay(schedule["date"], selectedDay))
         .toList()
       ..sort((a, b) => a["date"].compareTo(b["date"]));
+
   }
 
 
@@ -174,26 +177,23 @@ class _TableCalendarScreenState extends State<App> {
             )
           )
               : ListView.builder(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(15),
             itemCount: getFilteredSchedules().length,
             itemBuilder: (context, index) {
               final schedule = getFilteredSchedules()[index];
               return Card(
-                elevation: 4,
+                elevation: 6,
                 margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10), // 항목 간 간격
                 child: SizedBox(
                   height: 90, // 항목 높이
                   child: ListTile(
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                     title: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           schedule["title"],
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800
-                          ),
+                          style: TextStyle(fontSize: 16),
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(width: 4),
@@ -205,11 +205,7 @@ class _TableCalendarScreenState extends State<App> {
                     ),
                     subtitle: Text(
                       schedule["description"],
-                      style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400
-                      ),
+                      style: TextStyle(color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -220,15 +216,32 @@ class _TableCalendarScreenState extends State<App> {
                         schedule["image"],
                         width: 60,
                         height: 60,
-                        fit: BoxFit.fill,
+                        fit: BoxFit.cover,
                       )
                           : SizedBox(width: 50, height: 50),
                     ),
+                    onTap: () {
+                      // 상세 페이지로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailPage(
+                            model: DetailPageModel(
+                              title: schedule["title"],
+                              description: schedule["description"],
+                              date: schedule["date"],
+                              image: schedule["image"],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               );
             },
           ),
+
 
           /// bottom navigation bar 구현
           bottomNavigationBar: BottomNavigationBar(
@@ -271,13 +284,13 @@ List<Map<String, dynamic>> localSchedules = [
     "id": 1,
     "title": "눈사람 만들기",
     "date": DateTime(2024, 11, 30, 13, 0),
-    "description": "눈 얼마나 오는지 보고 눈사람 만들러 나가기",
+    "description": "오늘은 재우 생일이라서 제로 머리에 귀여운 빨간 리본을 달았다. 재우가 엄청 좋아해줘서 나도 기분이 좋았다. 미역국도 끓였는데 언제나처럼.. 간을 잘 못 맞춰서 조금 속상했다. 나는 언제쯤 요리 고수가 될 수 있을까? 이번 방학에는 엄마한테 요리를 배워야겠다. 그나저나 제로가 요즘 밥을 잘 안 먹는다. 안 그래도 작은데 밥까지 안 먹으니 금방 쓰러져 버릴 것 같아서 걱정이다. 제로야 밥 좀 먹어~! ㅠ",
     "image": "assets/images/snowman.jpg",
   },
   {
     "id": 2,
     "title": "헬스장 운동",
-    "date": DateTime(2024, 12, 6, 18, 30),
+    "date": DateTime(2024, 11, 30, 18, 30),
     "description": "PT 수업 및 유산소 운동",
   },
   {
@@ -295,13 +308,13 @@ List<Map<String, dynamic>> localSchedules = [
   {
     "id": 5,
     "title": "뭐하지?",
-    "date": DateTime(2024, 12, 8, 14, 0),
+    "date": DateTime(2024, 12, 8, 7, 0),
     "description": "뭐할지 모르겠다",
   },
   {
     "id": 6,
-    "title": "뭐하지?",
-    "date": DateTime(2024, 12, 8, 14, 0),
-    "description": "뭐할지 모르겠다",
+    "title": "가나다",
+    "date": DateTime(2024, 11, 30, 16, 0),
+    "description": "이게뭐람",
   },
 ];
