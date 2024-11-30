@@ -71,6 +71,11 @@ class _TableCalendarScreenState extends State<App> {
                       color: Color(0xffFF5987),
                       shape: BoxShape.circle,
                     ),
+                    selectedTextStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white
+                    ),
                     defaultTextStyle: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
