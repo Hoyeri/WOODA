@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 class AddSchedulePage extends StatefulWidget {
   final DateTime dateTime;
+  final String? initialTitle;
+  final String? initialDescription;
 
   const AddSchedulePage({
     Key? key,
     required this.dateTime,
+    this.initialDescription,
+    this.initialTitle
   }) : super(key: key);
 
   @override

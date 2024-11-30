@@ -260,12 +260,27 @@ class _TableCalendarScreenState extends State<App> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetailPage(
+                            schedule: schedule,
                             model: DetailPageModel(
                               title: schedule["title"],
                               description: schedule["description"],
                               date: schedule["date"],
                               image: schedule["image"],
                             ),
+                            onDelete: () {
+                              setState(() {
+                                localSchedules.removeWhere((item) => item["id"] == schedule["id"]);
+                              });
+                              Navigator.pop(context);
+                            },
+                            onUpdate: (updateSchedule) {
+                              setState(() {
+                                final index = localSchedules.indexWhere((item) => item["id"] == schedule["id"]);
+                                if (index != -1) {
+                                  localSchedules[index] = updateSchedule;
+                                }
+                              });
+                            },
                           ),
                         ),
                       );

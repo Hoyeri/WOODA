@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/screens/add_schedule_page.dart';
 
 class DetailPage extends StatelessWidget {
   final DetailPageModel model; // 모델로 받기
+  final Map<String, dynamic> schedule;
+  final void Function(Map<String, dynamic>) onUpdate; // 수정 시 호출
+  final void Function() onDelete; // 삭제 시 호출
 
   const DetailPage({
     Key? key,
     required this.model,
+    required this.onDelete,
+    required this.onUpdate,
+    required this.schedule,
   }) : super(key: key);
 
   @override
@@ -105,6 +112,46 @@ class DetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          // 수정 및 삭제 버튼
+          Padding(
+            padding: const EdgeInsets.all(3),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    onUpdate(schedule); // 수정 기능 호출
+                  },
+                  style: ElevatedButton.styleFrom(
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                    foregroundColor: Colors.black54,
+                    backgroundColor: Colors.white60,
+                  ),
+                  child: const Text('수정'),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    onDelete(); // 삭제 기능 호출
+                    Navigator.pop(context); // 삭제 후 이전 화면으로 돌아가기
+                  },
+                  style: ElevatedButton.styleFrom(
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                    foregroundColor: Colors.black54,
+                    backgroundColor: Colors.white60,
+                  ),
+                  child: const Text('삭제'),
+                ),
+                const SizedBox(width: 15),
               ],
             ),
           ),
