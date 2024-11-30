@@ -17,6 +17,12 @@ class _TableCalendarScreenState extends State<App> {
   List<String> diaries = []; // 일기 데이터 리스트
   List<String> schedules = []; // 일정 데이터 리스트
 
+  List<Map<String, dynamic>> getFilteredSchedules() {
+    return localSchedules
+        .where((schedule) => isSameDay(schedule["date"], selectedDay))
+        .toList()
+      ..sort((a, b) => a["date"].compareTo(b["date"]));
+  }
 
 
   @override
@@ -145,7 +151,7 @@ class _TableCalendarScreenState extends State<App> {
             shape: const CircleBorder(),
             child: Icon(Icons.add),
           ),
-          body: localSchedules.isEmpty
+          body: getFilteredSchedules().isEmpty
           ? Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -168,23 +174,26 @@ class _TableCalendarScreenState extends State<App> {
             )
           )
               : ListView.builder(
-            padding: EdgeInsets.all(15),
-            itemCount: localSchedules.length,
+            padding: EdgeInsets.all(10),
+            itemCount: getFilteredSchedules().length,
             itemBuilder: (context, index) {
-              final schedule = localSchedules[index];
+              final schedule = getFilteredSchedules()[index];
               return Card(
-                elevation: 6,
+                elevation: 4,
                 margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10), // 항목 간 간격
                 child: SizedBox(
                   height: 90, // 항목 높이
                   child: ListTile(
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     title: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           schedule["title"],
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(width: 4),
@@ -196,7 +205,11 @@ class _TableCalendarScreenState extends State<App> {
                     ),
                     subtitle: Text(
                       schedule["description"],
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -207,7 +220,7 @@ class _TableCalendarScreenState extends State<App> {
                         schedule["image"],
                         width: 60,
                         height: 60,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       )
                           : SizedBox(width: 50, height: 50),
                     ),
@@ -216,7 +229,6 @@ class _TableCalendarScreenState extends State<App> {
               );
             },
           ),
-
 
           /// bottom navigation bar 구현
           bottomNavigationBar: BottomNavigationBar(
@@ -258,38 +270,38 @@ List<Map<String, dynamic>> localSchedules = [
   {
     "id": 1,
     "title": "눈사람 만들기",
-    "date": DateTime(2023, 12, 5, 10, 0),
+    "date": DateTime(2024, 11, 30, 13, 0),
     "description": "눈 얼마나 오는지 보고 눈사람 만들러 나가기",
     "image": "assets/images/snowman.jpg",
   },
   {
     "id": 2,
     "title": "헬스장 운동",
-    "date": DateTime(2023, 12, 6, 18, 30),
+    "date": DateTime(2024, 12, 6, 18, 30),
     "description": "PT 수업 및 유산소 운동",
   },
   {
     "id": 3,
     "title": "친구와 저녁 약속",
-    "date": DateTime(2023, 12, 7, 19, 0),
+    "date": DateTime(2024, 12, 7, 19, 0),
     "description": "홍대 이탈리안 레스토랑 예약",
   },
   {
     "id": 4,
     "title": "코드 리뷰",
-    "date": DateTime(2023, 12, 8, 14, 0),
+    "date": DateTime(2024, 12, 8, 14, 0),
     "description": "팀원과 함께 코드 최적화 작업",
   },
   {
     "id": 5,
     "title": "뭐하지?",
-    "date": DateTime(2023, 12, 8, 14, 0),
+    "date": DateTime(2024, 12, 8, 14, 0),
     "description": "뭐할지 모르겠다",
   },
   {
     "id": 6,
     "title": "뭐하지?",
-    "date": DateTime(2023, 12, 8, 14, 0),
+    "date": DateTime(2024, 12, 8, 14, 0),
     "description": "뭐할지 모르겠다",
   },
 ];
