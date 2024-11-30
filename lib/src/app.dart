@@ -11,16 +11,13 @@ class App extends StatefulWidget {
 class _TableCalendarScreenState extends State<App> {
   CalendarFormat format = CalendarFormat.week;
 
-  DateTime selectedDay = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    DateTime.now().day,
-  );
-
+  DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
 
   List<String> diaries = []; // 일기 데이터 리스트
   List<String> schedules = []; // 일정 데이터 리스트
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +145,7 @@ class _TableCalendarScreenState extends State<App> {
             shape: const CircleBorder(),
             child: Icon(Icons.add),
           ),
-          body: diaries.isEmpty
+          body: localSchedules.isEmpty
           ? Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -170,29 +167,56 @@ class _TableCalendarScreenState extends State<App> {
               ],
             )
           )
-        : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: schedules.length,
+              : ListView.builder(
+            padding: EdgeInsets.all(15),
+            itemCount: localSchedules.length,
             itemBuilder: (context, index) {
+              final schedule = localSchedules[index];
               return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: ListTile(
-                  title: Text(
-                    schedules[index],
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      setState(() {
-                        schedules.removeAt(index); // 일정 삭제
-                      });
-                    },
+                elevation: 6,
+                margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10), // 항목 간 간격
+                child: SizedBox(
+                  height: 90, // 항목 높이
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                    title: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          schedule["title"],
+                          style: TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          "${schedule["date"].hour}:${schedule["date"].minute.toString().padLeft(2, '0')}",
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      schedule["description"],
+                      style: TextStyle(color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: schedule["image"] != null
+                          ? Image.asset(
+                        schedule["image"],
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      )
+                          : SizedBox(width: 50, height: 50),
+                    ),
                   ),
                 ),
               );
             },
           ),
+
 
           /// bottom navigation bar 구현
           bottomNavigationBar: BottomNavigationBar(
@@ -228,3 +252,44 @@ class _TableCalendarScreenState extends State<App> {
     );
   }
 }
+
+/// test data
+List<Map<String, dynamic>> localSchedules = [
+  {
+    "id": 1,
+    "title": "눈사람 만들기",
+    "date": DateTime(2023, 12, 5, 10, 0),
+    "description": "눈 얼마나 오는지 보고 눈사람 만들러 나가기",
+    "image": "assets/images/snowman.jpg",
+  },
+  {
+    "id": 2,
+    "title": "헬스장 운동",
+    "date": DateTime(2023, 12, 6, 18, 30),
+    "description": "PT 수업 및 유산소 운동",
+  },
+  {
+    "id": 3,
+    "title": "친구와 저녁 약속",
+    "date": DateTime(2023, 12, 7, 19, 0),
+    "description": "홍대 이탈리안 레스토랑 예약",
+  },
+  {
+    "id": 4,
+    "title": "코드 리뷰",
+    "date": DateTime(2023, 12, 8, 14, 0),
+    "description": "팀원과 함께 코드 최적화 작업",
+  },
+  {
+    "id": 5,
+    "title": "뭐하지?",
+    "date": DateTime(2023, 12, 8, 14, 0),
+    "description": "뭐할지 모르겠다",
+  },
+  {
+    "id": 6,
+    "title": "뭐하지?",
+    "date": DateTime(2023, 12, 8, 14, 0),
+    "description": "뭐할지 모르겠다",
+  },
+];
