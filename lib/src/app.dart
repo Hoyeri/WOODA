@@ -3,6 +3,8 @@ import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
+import 'package:wooda_client/src/screens/date_time_selection_page.dart';
+import 'package:wooda_client/src/screens/add_schedule_page.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -148,7 +150,39 @@ class _TableCalendarScreenState extends State<App> {
 
           /// floating button 구현
           floatingActionButton: FloatingActionButton(
-              onPressed: () {},
+            onPressed: () async {
+              // Step 1: 날짜 및 시간 선택
+              final dateTimeResult = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DateTimeSelectionPage(),
+                ),
+              );
+
+              if (dateTimeResult != null && dateTimeResult is Map<String, dynamic>) {
+                DateTime dateTime = DateTime(
+                  dateTimeResult["date"].year,
+                  dateTimeResult["date"].month,
+                  dateTimeResult["date"].day,
+                  dateTimeResult["time"].hour,
+                  dateTimeResult["time"].minute,
+                );
+
+                // Step 2: 제목 및 내용 입력
+                final scheduleResult = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddSchedulePage(dateTime: dateTime),
+                  ),
+                );
+
+                if (scheduleResult != null && scheduleResult is Map<String, dynamic>) {
+                  setState(() {
+                    localSchedules.add(scheduleResult);
+                  });
+                }
+              }
+            },
             backgroundColor: const Color(0xffFF5987),
             foregroundColor: Colors.white,
             shape: const CircleBorder(),

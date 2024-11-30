@@ -78,7 +78,7 @@ class DetailPage extends StatelessWidget {
                           model.description,
                           style: const TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: Colors.grey, // 내용 회색
                             height: 1.5, // 줄 간격
                           ),
