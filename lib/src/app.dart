@@ -415,6 +415,7 @@ class _TableCalendarScreenState extends State<App> {
 List<Map<String, dynamic>> localSchedules = [
   {
     "id": 1,
+    "writer": "홍예림",
     "type": "diary",
     "title": "생일 축하해",
     "date": DateTime(2024, 12, 2, 13, 0),
@@ -423,6 +424,7 @@ List<Map<String, dynamic>> localSchedules = [
   },
   {
     "id": 2,
+    "writer": "홍예림",
     "type": "schedule",
     "title": "헬스장 운동",
     "date": DateTime(2024, 12, 3, 18, 30),
@@ -430,6 +432,7 @@ List<Map<String, dynamic>> localSchedules = [
   },
   {
     "id": 3,
+    "writer": "홍예림",
     "type": "schedule",
     "title": "친구와 저녁 약속",
     "date": DateTime(2024, 12, 7, 19, 0),
@@ -438,6 +441,7 @@ List<Map<String, dynamic>> localSchedules = [
   {
     "id": 4,
     "type": "diary",
+    "writer": "홍예림",
     "title": "홍쭐리 키우기",
     "date": DateTime(2024, 12, 3, 14, 0),
     "description": "쭐리야 무럭무럭 자라줘! 홍쭐의 매력 포인트는 코에 있는 검은 점이랑 목 뒤에 있는 하얀 후드, 오동통한 쿠앤크 꼬리 ㅎ ㅎ 그리고 보석 같은 눈이에요.",
@@ -445,13 +449,48 @@ List<Map<String, dynamic>> localSchedules = [
   {
     "id": 5,
     "type": "diary",
+    "writer": "홍예림",
     "title": "기념일",
     "date": DateTime(2024, 12, 6, 7, 0),
     "description": "나는 네가 너라서 좋아. 말투도 표정도 걸음걸이도 다 너다워서 좋고, 편지에 써준 글도 딱 너 같아서 기분이 좋아. 마음에는 뭐가 많은데 말로 표현하기가 어렵다.. 그래서 오늘 일기는 이게 다야! 언제부터인지 모르게 마음에 들어와 버렸어.",
   },
   {
     "id": 6,
+    "writer": "홍예림",
+    "type": "schedule",
     "title": "동생 과외하기",
+    "date": DateTime(2024, 12, 8, 16, 0),
+    "description": "귀찮다",
+  },
+  {
+    "id": 7,
+    "writer": "김구리",
+    "type": "diary",
+    "title": "공휴일은 학교 안 가는 날",
+    "date": DateTime(2024, 12, 8, 16, 0),
+    "description": "한글날이라 오늘은 강의가 없어서 중도에서 공부를 했다. 가끔은 이렇게 쉬어가는 시간도 필요하다는 걸 절실히 느꼈다. 그럼 내일 또 쉬어도 되나?",
+  },
+  {
+    "id": 8,
+    "writer": "수원맘",
+    "type": "diary",
+    "title": "마크에서 살아남기",
+    "date": DateTime(2024, 12, 8, 16, 0),
+    "description": "상숭이랑 예림언니랑 유빈이랑 같이 마인크래프트에서 다이아 캐기 장인이 되었다. 상원이 거 뺏는 게 세상에서 젤 재밌더라",
+  },
+  {
+    "id": 9,
+    "writer": "김구리",
+    "type": "schedule",
+    "title": "과외",
+    "date": DateTime(2024, 12, 8, 16, 0),
+    "description": "하기 싫지만 버텨야지",
+  },
+  {
+    "id": 10,
+    "writer": "수원맘",
+    "type": "schedule",
+    "title": "팀플하러 중도 가기",
     "date": DateTime(2024, 12, 8, 16, 0),
     "description": "귀찮다",
   },

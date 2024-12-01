@@ -13,13 +13,17 @@ class AllSchedulesPage extends StatefulWidget {
 
 class _AllSchedulesPageState extends State<AllSchedulesPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
-  int _selectedTabIndex = 1; // 현재 TabBar 인덱스
+  int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
 
   List<Map<String, dynamic>> getFilteredAndSortedSchedules(String type) {
-    return widget.schedules
+    final filteredSchedules = widget.schedules
         .where((schedule) => schedule["type"] == type)
-        .toList()
-      ..sort((a, b) => a["date"].compareTo(b["date"]));
+        .toList();
+    // "diary"일 경우 최신순 정렬, "schedule"일 경우 오래된 순 정렬
+    filteredSchedules.sort((a, b) => type == "diary"
+        ? b["date"].compareTo(a["date"]) // 최신순 정렬
+        : a["date"].compareTo(b["date"])); // 오래된 순 정렬
+    return filteredSchedules;
   }
 
   @override
@@ -41,7 +45,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
           ),
           backgroundColor: Colors.white,
           elevation: 0,
-          automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
+          automaticallyImplyLeading: false,
           bottom: TabBar(
             labelColor: const Color(0xffFF5987),
             labelStyle: const TextStyle(
@@ -79,26 +83,19 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
             // 배경 이미지
             Positioned.fill(
               child: Image.asset(
-                'assets/images/background_04.png', // 배경 이미지 경로
-                fit: BoxFit.cover, // 화면 크기에 맞게 이미지 채우기
+                'assets/images/background_04.png',
+                fit: BoxFit.cover,
               ),
             ),
-            if (_selectedTabIndex == 1 || _selectedTabIndex == 2) // 일정 또는 일기 탭
+            if (_selectedTabIndex == 1) // "일정" 탭
               ListView.builder(
                 padding: const EdgeInsets.all(15),
-                itemCount: _selectedTabIndex == 1
-                    ? getFilteredAndSortedSchedules("schedule").length
-                    : getFilteredAndSortedSchedules("diary").length,
+                itemCount: getFilteredAndSortedSchedules("schedule").length,
                 itemBuilder: (context, index) {
-                  final filteredSchedules = _selectedTabIndex == 1
-                      ? getFilteredAndSortedSchedules("schedule")
-                      : getFilteredAndSortedSchedules("diary");
-                  final schedule = filteredSchedules[index];
-
+                  final schedule = getFilteredAndSortedSchedules("schedule")[index];
                   return Card(
                     elevation: 6,
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 6, horizontal: 10),
+                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
                     child: ListTile(
                       title: Text(schedule["title"]),
                       subtitle: Text(schedule["description"]),
@@ -109,40 +106,130 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                   );
                 },
               )
+            else if (_selectedTabIndex == 2) // "일기" 탭
+              ListView.builder(
+                padding: const EdgeInsets.all(15),
+                itemCount: getFilteredAndSortedSchedules("diary").length,
+                itemBuilder: (context, index) {
+                  final diary = getFilteredAndSortedSchedules("diary")[index];
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 왼쪽: 사용자 프로필 및 이름
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 10),
+                              child: CircleAvatar(
+                                radius: 24,
+                                backgroundImage: AssetImage(
+                                    'assets/images/profile_default.png'),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              diary["writer"] ?? "익명",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // 오른쪽: 카드
+                      Expanded(
+                        child: Card(
+                          elevation: 3,
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // 작성 날짜
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: Text(
+                                    "${diary["date"].year}/${diary["date"].month.toString().padLeft(2, '0')}/${diary["date"].day.toString().padLeft(2, '0')}",
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // 제목
+                                Text(
+                                  diary["title"],
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                // 내용
+                                Text(
+                                  diary["description"],
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                // 하트 및 댓글 버튼
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.favorite_border,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {},
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.comment_outlined,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              )
             else
               const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '표시할 디데이가 없어요😢',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      '+ 버튼으로 디데이를 추가해 보세요!',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    )
-                  ],
-                )
+                child: Text(
+                  "표시할 내용이 없습니다.",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
               ),
           ],
         ),
-
-        /// BottomNavigationBar
+        // Bottom Navigation Bar
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           showSelectedLabels: true,
           showUnselectedLabels: false,
           backgroundColor: Colors.white,
-          currentIndex: _currentIndex, // 디폴트 버튼 == '나의 일상'
-
-          /// 모아보기로 이동
+          currentIndex: _currentIndex,
           onTap: (index) {
             if (index == 1) {
               Navigator.push(
