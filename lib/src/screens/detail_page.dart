@@ -1,7 +1,10 @@
+/// detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 
 class DetailPage extends StatelessWidget {
   final DetailPageModel model; // 모델로 받기
@@ -46,7 +49,18 @@ class DetailPage extends StatelessWidget {
             iconSize: 25,
             onSelected: (String value) {
               if (value == 'edit') {
-                onUpdate(schedule); // 수정 기능 호출
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditSchedulePage(
+                      schedule: schedule,
+                      onUpdate: (updatedSchedule) {
+                        onUpdate(updatedSchedule); // 업데이트된 스케줄 전달
+                        Navigator.pop(context); // 수정 후 DetailPage로 복귀
+                      },
+                    ),
+                  ),
+                );
               } else if (value == 'delete') {
                 onDelete();// 삭제 기능 호출
                 Navigator.pop(context); // 삭제 후 이전 화면으로 이동

@@ -1,4 +1,4 @@
-/// lib\app.dart
+/// app.dart
 
 import 'package:flutter/material.dart';
 import 'package:get/get_common/get_reset.dart';
@@ -8,6 +8,7 @@ import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
 import 'package:wooda_client/src/screens/add_schedule_page.dart';
+import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -36,7 +37,21 @@ class _TableCalendarScreenState extends State<App> {
     setState(() {
       localSchedules.removeWhere((schedule) => schedule["id"] == id);
     });
+
   }
+
+  void _updateSchedule(Map<String, dynamic> updatedSchedule) {
+    setState(() {
+      final index = localSchedules.indexWhere(
+            (schedule) => schedule["id"] == updatedSchedule["id"],
+      );
+      if (index != -1) {
+        localSchedules[index] = updatedSchedule;
+      }
+    });
+  }
+
+
 
 
 
@@ -279,15 +294,12 @@ class _TableCalendarScreenState extends State<App> {
                               date: schedule["date"],
                               image: schedule["image"],
                             ),
-                            onDelete: () => _deleteSchedule(schedule["id"]),
-                            onUpdate: (updateSchedule) {
-                              setState(() {
-                                final index = localSchedules.indexWhere((item) => item["id"] == schedule["id"]);
-                                if (index != -1) {
-                                  localSchedules[index] = updateSchedule;
-                                }
-                              });
-                            },
+                            onDelete: () {
+                              _deleteSchedule(schedule["id"]);
+                            } ,
+                            onUpdate: (updatedSchedule) {
+                              _updateSchedule(updatedSchedule);
+                            }
                           ),
                         ),
                       );
