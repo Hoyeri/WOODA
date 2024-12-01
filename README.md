@@ -1,6 +1,6 @@
 # wooda_client
 
-A new Flutter project.
+ - 공유 일정 관리 서비스 WOODA
 
 ## Getting Started
 
