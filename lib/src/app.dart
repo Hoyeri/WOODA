@@ -1,14 +1,12 @@
 /// app.dart
 
 import 'package:flutter/material.dart';
-import 'package:get/get_common/get_reset.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
 import 'package:wooda_client/src/screens/add_schedule_page.dart';
-import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);

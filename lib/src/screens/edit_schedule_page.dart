@@ -1,9 +1,6 @@
 /// edit_schedule_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:wooda_client/src/screens/detail_page.dart';
-import 'package:wooda_client/src/app.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 
 class EditSchedulePage extends StatefulWidget {
