@@ -22,7 +22,7 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String formattedDate = DateFormat('yyyy년 MM월 dd일, EEEE', 'ko_KR').format(model.date);
+    final String formattedDate = DateFormat('yyyy년 MM월 dd일 EEEE, HH:mm', 'ko_KR').format(model.date);
 
     return Scaffold(
       appBar: AppBar(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/screens/all_schedules_page.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
 import 'package:wooda_client/src/screens/add_schedule_page.dart';
@@ -14,8 +15,11 @@ class App extends StatefulWidget {
   @override
   State<App> createState() => _TableCalendarScreenState();
 }
+
 class _TableCalendarScreenState extends State<App> {
   CalendarFormat format = CalendarFormat.week;
+
+  int _currentIndex = 1;
 
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
@@ -48,7 +52,6 @@ class _TableCalendarScreenState extends State<App> {
       }
     });
   }
-
 
 
 
@@ -315,10 +318,20 @@ class _TableCalendarScreenState extends State<App> {
             showSelectedLabels: true,
             showUnselectedLabels: false,
             backgroundColor: Colors.white,
-            currentIndex: 1, // 디폴트 버튼 == '나의 일상'
+            currentIndex: _currentIndex, // 디폴트 버튼 == '나의 일상'
+            
+            /// 모아보기로 이동
             onTap: (index) {
-              setState(() {
-              });
+              if (index == 0) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>AllSchedulesPage(schedules: localSchedules), ),);
+              }
+              else {
+                setState(() {
+                  _currentIndex = index;
+                });
+              }
             },
               items: [
                 BottomNavigationBarItem(

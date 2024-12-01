@@ -83,7 +83,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   @override
   Widget build(BuildContext context) {
     final String formattedDateTime =
-    DateFormat('yyyy년 MM월 dd일, HH:mm', 'ko_KR').format(_selectedDate);
+    DateFormat('yyyy년 MM월 dd일 EEEE, HH:mm', 'ko_KR').format(_selectedDate);
 
     return Scaffold(
       appBar: AppBar(
