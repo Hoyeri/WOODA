@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 
@@ -22,6 +23,7 @@ class DetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
@@ -46,7 +48,7 @@ class DetailPage extends StatelessWidget {
               if (value == 'edit') {
                 onUpdate(schedule); // 수정 기능 호출
               } else if (value == 'delete') {
-                onDelete(); // 삭제 기능 호출
+                onDelete();// 삭제 기능 호출
                 Navigator.pop(context); // 삭제 후 이전 화면으로 이동
               }
             },

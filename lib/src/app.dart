@@ -1,4 +1,7 @@
+/// lib\app.dart
+
 import 'package:flutter/material.dart';
+import 'package:get/get_common/get_reset.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
@@ -28,6 +31,14 @@ class _TableCalendarScreenState extends State<App> {
       ..sort((a, b) => a["date"].compareTo(b["date"]));
 
   }
+
+  void _deleteSchedule(int id) {
+    setState(() {
+      localSchedules.removeWhere((schedule) => schedule["id"] == id);
+    });
+  }
+
+
 
 
   @override
@@ -268,12 +279,7 @@ class _TableCalendarScreenState extends State<App> {
                               date: schedule["date"],
                               image: schedule["image"],
                             ),
-                            onDelete: () {
-                              setState(() {
-                                localSchedules.removeWhere((item) => item["id"] == schedule["id"]);
-                              });
-                              Navigator.pop(context);
-                            },
+                            onDelete: () => _deleteSchedule(schedule["id"]),
                             onUpdate: (updateSchedule) {
                               setState(() {
                                 final index = localSchedules.indexWhere((item) => item["id"] == schedule["id"]);
@@ -327,6 +333,8 @@ class _TableCalendarScreenState extends State<App> {
     );
   }
 }
+
+
 
 /// test data
 List<Map<String, dynamic>> localSchedules = [
