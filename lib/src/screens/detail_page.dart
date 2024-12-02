@@ -1,12 +1,10 @@
-/// detail_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final DetailPageModel model; // 모델로 받기
   final Map<String, dynamic> schedule;
   final void Function(Map<String, dynamic>) onUpdate; // 수정 시 호출
@@ -21,8 +19,16 @@ class DetailPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool isLiked = false; // 좋아요 상태
+
+  @override
   Widget build(BuildContext context) {
-    final String formattedDate = DateFormat('yyyy년 MM월 dd일 EEEE, HH:mm', 'ko_KR').format(model.date);
+    final String formattedDate =
+    DateFormat('yyyy년 MM월 dd일 EEEE, HH:mm', 'ko_KR').format(widget.model.date);
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +50,6 @@ class DetailPage extends StatelessWidget {
             icon: const Icon(
               Icons.more_vert,
               color: Colors.black,
-
             ),
             iconSize: 25,
             onSelected: (String value) {
@@ -53,16 +58,16 @@ class DetailPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditSchedulePage(
-                      schedule: schedule,
+                      schedule: widget.schedule,
                       onUpdate: (updatedSchedule) {
-                        onUpdate(updatedSchedule); // 업데이트된 스케줄 전달
+                        widget.onUpdate(updatedSchedule); // 업데이트된 스케줄 전달
                         Navigator.pop(context); // 수정 후 DetailPage로 복귀
                       },
                     ),
                   ),
                 );
               } else if (value == 'delete') {
-                onDelete();// 삭제 기능 호출
+                widget.onDelete(); // 삭제 기능 호출
                 Navigator.pop(context); // 삭제 후 이전 화면으로 이동
               }
             },
@@ -115,7 +120,7 @@ class DetailPage extends StatelessWidget {
                       children: [
                         // 제목
                         Text(
-                          model.title,
+                          widget.model.title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -125,7 +130,7 @@ class DetailPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         // 내용
                         Text(
-                          model.description,
+                          widget.model.description,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -135,11 +140,11 @@ class DetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         // 사진 표시
-                        if (model.image != null)
+                        if (widget.model.image != null)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.asset(
-                              model.image!,
+                              widget.model.image!,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: 400,
@@ -154,6 +159,45 @@ class DetailPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+              ],
+            ),
+          ),
+          // 좋아요 및 댓글 버튼
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // 좋아요 버튼
+                IconButton(
+                  icon: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? Colors.pinkAccent : Colors.pinkAccent,
+                    size: 28,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isLiked = !isLiked;
+                    });
+                  },
+                ),
+                // 댓글 버튼
+                IconButton(
+                  icon: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.grey,
+                    size: 28,
+                  ),
+                  onPressed: () {
+                    // 댓글 버튼 클릭 시 실행될 기능 추가
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("댓글 버튼이 눌렸습니다."),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
