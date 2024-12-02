@@ -375,7 +375,11 @@ class _TableCalendarScreenState extends State<App> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AllSchedulesPage(schedules: localSchedules),
+                    builder: (context) => AllSchedulesPage(
+                        schedules: localSchedules,
+                        onUpdate: _updateSchedule,
+                        onDelete: _deleteSchedule,
+                    ),
                   ),
                 );
               } else {
