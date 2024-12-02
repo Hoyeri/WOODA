@@ -3,12 +3,13 @@ import 'package:flutter/rendering.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:wooda_client/src/app.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/models/schedule_model.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 
 class AllSchedulesPage extends StatefulWidget {
-  final List<Map<String, dynamic>> schedules;
+  final List<Schedule> schedules;
   final void Function(int id) onDelete; // 삭제 함수
-  final void Function(Map<String, dynamic> updatedSchedule) onUpdate;
+  final void Function(Schedule updatedSchedule) onUpdate;
 
   const AllSchedulesPage({
     Key? key,
@@ -25,14 +26,14 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
   int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
 
-  List<Map<String, dynamic>> getFilteredAndSortedSchedules(String type) {
+  List<Schedule> getFilteredAndSortedSchedules(String type) {
     final filteredSchedules = widget.schedules
-        .where((schedule) => schedule["type"] == type)
+        .where((schedule) => schedule.type == type)
         .toList();
     // "diary"일 경우 최신순 정렬, "schedule"일 경우 오래된 순 정렬
     filteredSchedules.sort((a, b) => type == "diary"
-        ? b["date"].compareTo(a["date"]) // 최신순 정렬
-        : a["date"].compareTo(b["date"])); // 오래된 순 정렬
+        ? b.date.compareTo(a.date) // 최신순 정렬
+        : a.date.compareTo(b.date)); // 오래된 순 정렬
     return filteredSchedules;
   }
 
@@ -107,10 +108,10 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                     elevation: 6,
                     margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
                     child: ListTile(
-                      title: Text(schedule["title"]),
-                      subtitle: Text(schedule["description"]),
+                      title: Text(schedule.title),
+                      subtitle: Text(schedule.description),
                       trailing: Text(
-                        "${schedule["date"].hour}:${schedule["date"].minute.toString().padLeft(2, '0')}",
+                        "${schedule.date.hour}:${schedule.date.minute.toString().padLeft(2, '0')}",
                       ),
                     ),
                   );
@@ -130,14 +131,14 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                           builder: (context) => DetailPage(
                             schedule: diary,
                             model: DetailPageModel(
-                              id: diary["id"],
-                              title: diary["title"],
-                              description: diary["description"],
-                              date: diary["date"],
-                              image: diary["image"],
+                              id: diary.id,
+                              title: diary.title,
+                              description: diary.description,
+                              date: diary.date,
+                              image: diary.image,
                             ),
                             onDelete: () {
-                              widget.onDelete(diary["id"]); // 부모로부터 전달된 함수 호출
+                              widget.onDelete(diary.id); // 부모로부터 전달된 함수 호출
                               setState(() {}); // 삭제 후 화면 갱신
                             },
                             onUpdate: (updatedSchedule) {
@@ -166,7 +167,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                diary["writer"] ?? "익명",
+                                diary.writer,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -191,7 +192,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                   Align(
                                     alignment: Alignment.topRight,
                                     child: Text(
-                                      "${diary["date"].year}/${diary["date"].month.toString().padLeft(2, '0')}/${diary["date"].day.toString().padLeft(2, '0')}",
+                                      "${diary.date.year}/${diary.date.month.toString().padLeft(2, '0')}/${diary.date.day.toString().padLeft(2, '0')}",
                                       style: const TextStyle(
                                         fontSize: 10,
                                         color: Colors.grey,
@@ -201,7 +202,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                   const SizedBox(height: 8),
                                   // 제목
                                   Text(
-                                    diary["title"],
+                                    diary.title,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -211,7 +212,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                   const SizedBox(height: 8),
                                   // 내용
                                   Text(
-                                    diary["description"],
+                                    diary.description,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,

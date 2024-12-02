@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
+import 'package:wooda_client/src/models/schedule_model.dart';
 import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 
 class DetailPage extends StatefulWidget {
   final DetailPageModel model; // 모델로 받기
-  final Map<String, dynamic> schedule;
-  final void Function(Map<String, dynamic>) onUpdate; // 수정 시 호출
+  final Schedule schedule;
+  final void Function(Schedule) onUpdate; // 수정 시 호출
   final void Function() onDelete; // 삭제 시 호출
 
   const DetailPage({
@@ -34,7 +35,8 @@ class _DetailPageState extends State<DetailPage> {
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
+        elevation: 0,
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,

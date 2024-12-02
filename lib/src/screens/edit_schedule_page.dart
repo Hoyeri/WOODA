@@ -1,11 +1,12 @@
 /// edit_schedule_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:wooda_client/src/models/schedule_model.dart';
 
 
 class EditSchedulePage extends StatefulWidget {
-  final Map<String, dynamic> schedule;
-  final void Function(Map<String, dynamic>) onUpdate;
+  final Schedule schedule;
+  final void Function(Schedule) onUpdate;
 
   const EditSchedulePage({
     Key? key,
@@ -26,11 +27,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.schedule["title"]);
+    _titleController = TextEditingController(text: widget.schedule.title);
     _descriptionController =
-        TextEditingController(text: widget.schedule["description"]);
-    _selectedDate = widget.schedule["date"];
-    _imagePath = widget.schedule["image"];
+        TextEditingController(text: widget.schedule.description);
+    _selectedDate = widget.schedule.date;
+    _imagePath = widget.schedule.image;
   }
 
   @override
@@ -41,13 +42,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   }
 
   void _submitChanges() {
-    final updatedSchedule = {
-      "id": widget.schedule["id"], // 기존 ID 유지
-      "title": _titleController.text,
-      "description": _descriptionController.text,
-      "date": _selectedDate,
-      "image": widget.schedule["image"], // 이미지 변경 없이 기존 이미지 유지
-    };
+    Schedule updatedSchedule = Schedule( /// schedule 객체로 변경
+      id: widget.schedule.id, // 기존 ID 유지
+      type: widget.schedule.type,
+      writer: widget.schedule.writer,
+      title: _titleController.text,
+      description: _descriptionController.text,
+      date: _selectedDate,
+      image: widget.schedule.image, // 이미지 변경 없이 기존 이미지 유지
+    );
     widget.onUpdate(updatedSchedule);
     Navigator.pop(context);
   }
@@ -87,8 +90,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -193,7 +197,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           )
                         else
                           const SizedBox.shrink(),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         ElevatedButton(
                           onPressed: _submitChanges,
                           style: ElevatedButton.styleFrom(

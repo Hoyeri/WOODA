@@ -16,6 +16,7 @@ class _DateTimeSelectionPageState extends State<DateTimeSelectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text("날짜 및 시간 선택"),
       ),
       body: Column(
@@ -53,14 +54,14 @@ class _DateTimeSelectionPageState extends State<DateTimeSelectionPage> {
             ),
           ),
           const Spacer(),
-          ElevatedButton(
+          ElevatedButton( ///그냥 버튼으로 수정
             onPressed: () {
               Navigator.pop(context, {
                 "date": selectedDate,
                 "time": selectedTime,
               });
             },
-            child: const Text("다음 단계로"),
+            child: const Text("다음 단계로",),
           ),
         ],
       ),

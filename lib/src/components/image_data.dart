@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+
 class ImageData extends StatelessWidget {
   String icon;
   final double? width;
