@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme.light(
           primary: Color(0xffFF5987), // 주요 색상 설정
           secondary: Color(0xffE5EBFC), // 보조 색상 설정
-          background: Colors.white, // 배경 색상 설정
         ),
         fontFamily: 'Inter', // 전체 앱에 적용되는 폰트
         appBarTheme: const AppBarTheme(

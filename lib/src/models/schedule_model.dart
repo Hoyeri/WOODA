@@ -6,6 +6,7 @@ class Schedule {
   final DateTime date;
   final String description;
   final String? image;
+  int likes; // 좋아요 수
 
   Schedule({
     required this.id,
@@ -15,6 +16,7 @@ class Schedule {
     required this.date,
     required this.description,
     this.image,
+    this.likes = 0, // 기본값 0
   });
 
   factory Schedule.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,7 @@ class Schedule {
       date: map["date"],
       description: map["description"],
       image: map["image"],
+      likes: map["likes"] ?? 0, // Map에서 좋아요 수를 가져오거나 기본값 0
     );
   }
 
@@ -38,6 +41,7 @@ class Schedule {
       "date": date,
       "description": description,
       "image": image,
+      "likes": likes, // 좋아요 수 저장
     };
   }
 }

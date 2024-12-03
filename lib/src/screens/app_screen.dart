@@ -56,7 +56,7 @@ class _AppScreenState extends State<AppScreen> {
             style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 21,
-              color: Colors.black
+                color: Colors.black
             ),
           ),
           centerTitle: true,
@@ -238,10 +238,12 @@ class _AppScreenState extends State<AppScreen> {
                         ),
                         onDelete: () {
                           _scheduleService.deleteSchedule(schedule.id);
-                        },
+                          setState(() {});
+                          },
                         onUpdate: (updatedSchedule) {
                           _scheduleService.updateSchedule(updatedSchedule);
-                        },
+                          setState(() {});
+                          },
                       ),
                     ),
                   );
@@ -317,7 +319,7 @@ class _AppScreenState extends State<AppScreen> {
                       const SizedBox(width: 8),
                       // 이미지 미리보기
                       ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8),
                         child: (schedule.image != null && schedule.image!.isNotEmpty)
                             ? Image.asset(
                           schedule.image!,

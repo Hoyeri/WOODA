@@ -173,17 +173,34 @@ class _DetailPageState extends State<DetailPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // 좋아요 버튼
-                IconButton(
-                  icon: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.pinkAccent : Colors.pinkAccent,
-                    size: 28,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isLiked = !isLiked;
-                    });
-                  },
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.pinkAccent,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isLiked = !isLiked;
+                          if (isLiked) {
+                            widget.schedule.likes++;
+                          } else {
+                            widget.schedule.likes--;
+                          }
+                        });
+                      },
+                    ),
+                    Text(
+                      '${widget.schedule.likes}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
                 // 댓글 버튼
                 IconButton(
