@@ -136,17 +136,27 @@ class _DetailPageState extends State<DetailPage> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
+                  child: Container( // 텍스트가 왼쪽에 정렬되도록 컨테이너 사용
+                    alignment: Alignment.topLeft, // 컨테이너 내에서 왼쪽 정렬
+                    padding: const EdgeInsets.all(35),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start, // Column의 하위 위젯을 왼쪽 정렬
                       children: [
-                        Text(widget.model.title,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(
+                          widget.model.title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 12),
-                        Text(widget.model.description,
-                            style: const TextStyle(fontSize: 15)),
+                        Text(
+                          widget.model.description,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            height: 1.5, // 줄 간격 설정
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         if (widget.model.image != null)
                           ClipRRect(

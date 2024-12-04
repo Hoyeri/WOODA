@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:wooda_client/src/app.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
@@ -28,6 +29,36 @@ class AllSchedulesPage extends StatefulWidget {
 class _AllSchedulesPageState extends State<AllSchedulesPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
   int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
+  DateTime _startDate = _calculateStartDate(DateTime.now());
+  final ScrollController _scrollController = ScrollController();
+
+// 현재 주의 시작 날짜 계산 함수
+  static DateTime _calculateStartDate(DateTime referenceDate) {
+    return referenceDate.subtract(Duration(days: referenceDate.weekday % 7));
+  }
+
+  // 현재 주의 시작 날짜와 끝 날짜 계산
+  DateTime get _endDate => _startDate.add(const Duration(days: 6));
+
+
+  void _changeWeek(int offset) {
+    setState(() {
+      _startDate = _startDate.add(Duration(days: 7 * offset));
+      _scrollController.animateTo(
+        0, // 슬라이드의 가장 왼쪽
+        duration: const Duration(milliseconds: 300), // 애니메이션 지속 시간
+        curve: Curves.easeOut, // 애니메이션 곡선
+      );
+    });
+  }
+
+  List<Schedule> getSchedulesForCurrentWeek() {
+    return widget.schedules
+        .where((schedule) =>
+    schedule.date.isAfter(_startDate.subtract(const Duration(days: 1))) &&
+        schedule.date.isBefore(_endDate.add(const Duration(days: 1))))
+        .toList();
+  }
 
   void toggleLike(Schedule schedule) {
     setState(() {
@@ -57,6 +88,17 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final schedulesByDay = List.generate(7, (index) {
+      final day = _startDate.add(Duration(days: index));
+      final daySchedules = widget.schedules
+          .where((schedule) => schedule.date.day == day.day && schedule.date.month == day.month && schedule.date.year == day.year)
+          .toList();
+      return {
+        'date': day,
+        'schedules': daySchedules,
+      };
+    });
+
     return DefaultTabController(
       length: 3,
       initialIndex: _selectedTabIndex,
@@ -117,24 +159,218 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
               ),
             ),
             if (_selectedTabIndex == 1) // "일정" 탭
-              ListView.builder(
-                padding: const EdgeInsets.all(15),
-                itemCount: getFilteredAndSortedSchedules("schedule").length,
-                itemBuilder: (context, index) {
-                  final schedule = getFilteredAndSortedSchedules("schedule")[index];
-                  return Card(
-                    elevation: 6,
-                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-                    child: ListTile(
-                      title: Text(schedule.title),
-                      subtitle: Text(schedule.description),
-                      trailing: Text(
-                        "${schedule.date.hour}:${schedule.date.minute.toString().padLeft(2, '0')}",
+              Column(
+                children: [
+                  // 주간 선택 바
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                          onPressed: () => _changeWeek(-1),
+                        ),
+                        Text(
+                          "${DateFormat('MM.dd').format(_startDate)} - ${DateFormat('MM.dd').format(_endDate)}",
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                          onPressed: () => _changeWeek(1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: List.generate(7, (index) {
+                          final day = _startDate.add(Duration(days: index));
+                          final daySchedules = widget.schedules
+                              .where((schedule) =>
+                          schedule.type == "schedule" &&
+                              schedule.date.year == day.year &&
+                              schedule.date.month == day.month &&
+                              schedule.date.day == day.day)
+                              .toList();
+
+                          return Container(
+                            padding: EdgeInsets.only(left: 20),
+                            width: 180, // 하루 일정 열의 폭 설정
+                            margin: const EdgeInsets.only(right: 8.0), // 열 간 간격
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 날짜 표시
+                                Text(
+                                  DateFormat('EEEE, MM.dd', 'ko_KR').format(day),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 8),
+                                // 일정 표시 또는 "일정 없음" 메시지
+                                daySchedules.isEmpty
+                                    ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(top: 16.0),
+                                    child: Text(
+                                      "일정 없음",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                    : Expanded(
+                                  child: ListView.builder(
+                                    itemCount: daySchedules.length,
+                                    itemBuilder: (context, index) {
+                                      final schedule = daySchedules[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => DetailPage(
+                                                schedule: schedule,
+                                                model: DetailPageModel(
+                                                  id: schedule.id,
+                                                  title: schedule.title,
+                                                  description: schedule.description,
+                                                  date: schedule.date,
+                                                  image: schedule.image,
+                                                ),
+                                                onDelete: () {
+                                                  widget.onDelete(schedule.id);
+                                                  setState(() {});
+                                                },
+                                                onUpdate: (updatedSchedule) {
+                                                  widget.onUpdate(updatedSchedule);
+                                                  setState(() {});
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(vertical: 4.0),
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            elevation: 10.0,
+                                            child: SizedBox(
+                                              width: 160,
+                                              height: 120,
+                                              child: Column(
+                                                children: [
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Column(
+                                                            children: [
+                                                              CircleAvatar(
+                                                                radius: 13,
+                                                                backgroundImage: AssetImage(
+                                                                    'assets/images/profile_default.png'),
+                                                              ),
+                                                              const SizedBox(height: 4),
+                                                              Text(
+                                                                schedule.writer,
+                                                                style: const TextStyle(
+                                                                  fontSize: 9,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const SizedBox(width: 8),
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                              children: [
+                                                                SizedBox(height: 4),
+                                                                Text(
+                                                                  schedule.title,
+                                                                  style: const TextStyle(
+                                                                    fontSize: 13,
+                                                                    fontWeight: FontWeight.bold,
+                                                                  ),
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                ),
+                                                                SizedBox(height: 2),
+                                                                Align(
+                                                                  alignment: Alignment.topLeft,
+                                                                  child: Text(
+                                                                    DateFormat('HH:mm')
+                                                                        .format(schedule.date),
+                                                                    style: const TextStyle(
+                                                                      fontSize: 12,
+                                                                      color: Colors.grey,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: Container(
+                                                      alignment: Alignment.topLeft,
+                                                      width: double.infinity,
+                                                      padding: const EdgeInsets.only(
+                                                          left: 10, right: 10, top: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: const BorderRadius.only(
+                                                          bottomLeft: Radius.circular(20),
+                                                          bottomRight: Radius.circular(20),
+                                                        ),
+                                                      ),
+                                                      child: Text(
+                                                        schedule.description,
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.black,
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
                       ),
                     ),
-                  );
-                },
+                  ),
+                ],
               )
+
+
             else if (_selectedTabIndex == 2) // "일기" 탭
               ListView.builder(
                 padding: const EdgeInsets.all(15),
@@ -201,6 +437,9 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                         // 오른쪽: 카드
                         Expanded(
                           child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)
+                            ),
                             elevation: 3,
                             margin: const EdgeInsets.symmetric(vertical: 6),
                             child: Padding(
