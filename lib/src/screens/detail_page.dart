@@ -1,3 +1,5 @@
+/// detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -52,6 +54,7 @@ class _DetailPageState extends State<DetailPage> {
       }
 
       isLiked = !isLiked;
+      widget.onUpdate(widget.schedule); // 변경 사항 전달
     });
   }
 
@@ -106,72 +109,87 @@ class _DetailPageState extends State<DetailPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            color: Colors.white,
-            child: Text(
-              formattedDate,
-              style: const TextStyle(fontSize: 15, color: Colors.grey),
-              textAlign: TextAlign.center,
+          // 배경 이미지
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background_01.png',
+              fit: BoxFit.cover,
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // 내용
+          Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                color: Colors.white.withOpacity(0.8), // 배경 투명도 설정
+                child: Text(
+                  formattedDate,
+                  style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.model.title,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        Text(widget.model.description,
+                            style: const TextStyle(fontSize: 15)),
+                        const SizedBox(height: 24),
+                        if (widget.model.image != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              widget.model.image!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 400,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(widget.model.title,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    Text(widget.model.description, style: const TextStyle(fontSize: 15)),
-                    const SizedBox(height: 24),
-                    if (widget.model.image != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          widget.model.image!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 200,
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            isLiked ? Icons.favorite : Icons.favorite_border,
+                            color: Colors.pinkAccent,
+                          ),
+                          onPressed: toggleLike,
                         ),
-                      ),
+                        Text('${widget.schedule.likes}',
+                            style: const TextStyle(fontSize: 16)),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.comment_outlined, color: Colors.grey),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("댓글 버튼 클릭됨")),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-            ),
-          ),
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: Colors.pinkAccent,
-                      ),
-                      onPressed: toggleLike,
-                    ),
-                    Text('${widget.schedule.likes}', style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.comment_outlined, color: Colors.grey),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("댓글 버튼 클릭됨")),
-                    );
-                  },
-                ),
-              ],
-            ),
+            ],
           ),
         ],
       ),

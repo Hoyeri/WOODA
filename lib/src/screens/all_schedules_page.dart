@@ -1,3 +1,5 @@
+///all_shedules_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:wooda_client/src/components/image_data.dart';
@@ -25,6 +27,21 @@ class AllSchedulesPage extends StatefulWidget {
 class _AllSchedulesPageState extends State<AllSchedulesPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
   int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
+
+  void toggleLike(Schedule schedule) {
+    setState(() {
+      const currentUserId = "user123";
+
+      if (userLikes[schedule.id]?.contains(currentUserId) ?? false) {
+        userLikes[schedule.id]?.remove(currentUserId);
+        schedule.likes--;
+      } else {
+        userLikes.putIfAbsent(schedule.id, () => {});
+        userLikes[schedule.id]!.add(currentUserId);
+        schedule.likes++;
+      }
+    });
+  }
 
   List<Schedule> getFilteredAndSortedSchedules(String type) {
     final filteredSchedules = widget.schedules
@@ -123,6 +140,8 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                 itemCount: getFilteredAndSortedSchedules("diary").length,
                 itemBuilder: (context, index) {
                   final diary = getFilteredAndSortedSchedules("diary")[index];
+                  final isLiked = userLikes[diary.id]?.contains("user123") ?? false;
+
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -224,24 +243,35 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                   const SizedBox(height: 12),
                                   // 하트 및 댓글 버튼
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 왼쪽과 오른쪽 요소를 분리
                                     children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.favorite_border,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {},
+                                      Row(
+                                        children: [ // 왼쪽에 하트와 좋아요 수를 붙여서 배치
+                                          IconButton(
+                                            icon: Icon(
+                                              isLiked ? Icons.favorite : Icons.favorite_border,
+                                              color: Colors.red,
+                                            ),
+                                            onPressed: () => toggleLike(diary),
+                                          ),
+                                          Text(
+                                            '${diary.likes}', // 좋아요 수 표시
+                                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
                                       ),
                                       IconButton(
-                                        icon: const Icon(
-                                          Icons.comment_outlined,
-                                          color: Colors.blue,
-                                        ),
-                                        onPressed: () {},
+                                        icon: const Icon(Icons.comment_outlined, color: Colors.black54),
+                                        onPressed: () {
+                                          // 댓글 버튼 클릭 시 동작 추가
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text("댓글 버튼 클릭됨")),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
+
                                 ],
                               ),
                             ),
