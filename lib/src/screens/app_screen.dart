@@ -1,4 +1,5 @@
 ///app_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +14,7 @@ import 'package:wooda_client/src/data/local_schedules.dart';
 import 'package:wooda_client/src/services/schedule_service.dart';
 
 class AppScreen extends StatefulWidget {
-  const AppScreen({Key? key}) : super(key: key);
+  const AppScreen({super.key});
 
   @override
   State<AppScreen> createState() => _AppScreenState();

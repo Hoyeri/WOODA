@@ -6,11 +6,11 @@ class AddSchedulePage extends StatefulWidget {
   final String? initialDescription;
 
   const AddSchedulePage({
-    Key? key,
+    super.key,
     required this.dateTime,
     this.initialDescription,
     this.initialTitle
-  }) : super(key: key);
+  });
 
   @override
   State<AddSchedulePage> createState() => _AddSchedulePageState();
@@ -65,10 +65,10 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   });
                 }
               },
-              child: const Text("저장"),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
+              child: const Text("저장"),
             ),
           ],
         ),

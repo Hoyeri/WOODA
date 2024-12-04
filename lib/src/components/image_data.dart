@@ -7,9 +7,9 @@ class ImageData extends StatelessWidget {
   final double? width;
   ImageData(
       this.icon, {
-        Key? key,
+        super.key,
         this.width = 55,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

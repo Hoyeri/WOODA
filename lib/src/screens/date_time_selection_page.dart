@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DateTimeSelectionPage extends StatefulWidget {
-  const DateTimeSelectionPage({Key? key}) : super(key: key);
+  const DateTimeSelectionPage({super.key});
 
   @override
   State<DateTimeSelectionPage> createState() => _DateTimeSelectionPageState();

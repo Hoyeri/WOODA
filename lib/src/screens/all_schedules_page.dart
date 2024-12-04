@@ -1,12 +1,13 @@
 ///all_shedules_page.dart
+library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:wooda_client/src/app.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/models/schedule_model.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
+import 'package:wooda_client/src/screens/comment_page.dart';
 
 class AllSchedulesPage extends StatefulWidget {
   final List<Schedule> schedules;
@@ -14,11 +15,11 @@ class AllSchedulesPage extends StatefulWidget {
   final void Function(Schedule updatedSchedule) onUpdate;
 
   const AllSchedulesPage({
-    Key? key,
+    super.key,
     required this.schedules,
     required this.onUpdate,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   _AllSchedulesPageState createState() => _AllSchedulesPageState();
@@ -243,10 +244,11 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                   const SizedBox(height: 12),
                                   // 하트 및 댓글 버튼
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 왼쪽과 오른쪽 요소를 분리
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 좋아요와 댓글을 정렬
                                     children: [
+                                      // 좋아요 수와 아이콘
                                       Row(
-                                        children: [ // 왼쪽에 하트와 좋아요 수를 붙여서 배치
+                                        children: [
                                           IconButton(
                                             icon: Icon(
                                               isLiked ? Icons.favorite : Icons.favorite_border,
@@ -255,19 +257,40 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                                             onPressed: () => toggleLike(diary),
                                           ),
                                           Text(
-                                            '${diary.likes}', // 좋아요 수 표시
+                                            '${diary.likes}', // 좋아요 수
                                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.comment_outlined, color: Colors.black54),
-                                        onPressed: () {
-                                          // 댓글 버튼 클릭 시 동작 추가
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text("댓글 버튼 클릭됨")),
-                                          );
-                                        },
+                                      // 댓글 수와 아이콘
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.comment_outlined, color: Colors.grey),
+                                            onPressed: () {
+                                              scheduleComments.putIfAbsent(diary.id, () => []); // 댓글 초기화
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor: Colors.transparent,
+                                                builder: (context) {
+                                                  return CommentPage(
+                                                    initialComments: scheduleComments[diary.id]!,
+                                                    onCommentsUpdated: (updatedComments) {
+                                                      setState(() {
+                                                        scheduleComments[diary.id] = updatedComments;
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          Text(
+                                            '${scheduleComments[diary.id]?.length ?? 0}', // 댓글 수
+                                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),

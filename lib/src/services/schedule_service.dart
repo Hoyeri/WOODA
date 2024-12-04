@@ -1,4 +1,5 @@
 ///schedule_service.dart
+library;
 
 import 'package:wooda_client/src/models/schedule_model.dart';
 import 'package:table_calendar/table_calendar.dart';

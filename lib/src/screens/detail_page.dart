@@ -1,4 +1,5 @@
 /// detail_page.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/models/schedule_model.dart';
 import 'package:wooda_client/src/screens/edit_schedule_page.dart';
+import 'package:wooda_client/src/screens/comment_page.dart';
 
 // 전역 상태: 스케줄 ID별 좋아요 누른 사용자 관리
 Map<int, Set<String>> userLikes = {};
+Map<int, List<Map<String, dynamic>>> scheduleComments = {};
 
 class DetailPage extends StatefulWidget {
   final DetailPageModel model;
@@ -17,12 +20,12 @@ class DetailPage extends StatefulWidget {
   final void Function() onDelete;
 
   const DetailPage({
-    Key? key,
+    super.key,
     required this.model,
     required this.onDelete,
     required this.onUpdate,
     required this.schedule,
-  }) : super(key: key);
+  });
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -38,6 +41,7 @@ class _DetailPageState extends State<DetailPage> {
 
     // 좋아요 여부 확인 및 초기화
     isLiked = userLikes[widget.schedule.id]?.contains(currentUserId) ?? false;
+    scheduleComments.putIfAbsent(widget.schedule.id, () => []);
   }
 
   void toggleLike() {
@@ -178,14 +182,36 @@ class _DetailPageState extends State<DetailPage> {
                             style: const TextStyle(fontSize: 16)),
                       ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.comment_outlined, color: Colors.grey),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("댓글 버튼 클릭됨")),
-                        );
-                      },
-                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.comment_outlined, color: Colors.grey),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return CommentPage(
+                                  initialComments: scheduleComments[widget.schedule.id]!,
+                                  onCommentsUpdated: (updatedComments) {
+                                    // 댓글 리스트를 업데이트하여 전역 상태에 반영
+                                    setState(() {
+                                      scheduleComments[widget.schedule.id] = updatedComments;
+                                    });
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        Text(
+                            '${scheduleComments[widget.schedule.id]?.length ?? 0}',
+                            style: const TextStyle(fontSize: 16)
+                        )
+                      ],
+                    )
+
                   ],
                 ),
               ),

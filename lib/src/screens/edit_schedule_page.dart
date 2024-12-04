@@ -1,4 +1,5 @@
 /// edit_schedule_page.dart
+library;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/schedule_model.dart';
@@ -9,10 +10,10 @@ class EditSchedulePage extends StatefulWidget {
   final void Function(Schedule) onUpdate;
 
   const EditSchedulePage({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.onUpdate,
-  }) : super(key: key);
+  });
 
   @override
   _EditSchedulePageState createState() => _EditSchedulePageState();
