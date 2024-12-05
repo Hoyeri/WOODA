@@ -4,9 +4,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/components/image_data.dart';
-import 'package:wooda_client/src/app.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/models/schedule_model.dart';
+import 'package:wooda_client/src/screens/app_screen.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/comment_page.dart';
 
@@ -566,7 +566,7 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => App(),
+                  builder: (context) => AppScreen(),
                 ),
               );
             } else {

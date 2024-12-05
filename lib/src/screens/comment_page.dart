@@ -5,10 +5,10 @@ class CommentPage extends StatefulWidget {
   final Function(List<Map<String, dynamic>>) onCommentsUpdated; // 업데이트된 댓글 반환
 
   const CommentPage({
-    Key? key,
+    super.key,
     required this.initialComments,
     required this.onCommentsUpdated,
-  }) : super(key: key);
+  });
 
   @override
   _CommentPageState createState() => _CommentPageState();

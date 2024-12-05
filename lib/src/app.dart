@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wooda_client/src/screens/app_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:wooda_client/src/screens/sign_up_page.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -18,7 +18,7 @@ class App extends StatelessWidget {
         primarySwatch: Colors.grey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const AppScreen(),
+      home: const SignUpPage(),
     );
   }
 }
