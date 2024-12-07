@@ -40,9 +40,8 @@ class FriendsService {
   }
 
   // 친구 삭제
-  Future<Map<String, dynamic>> removeFriend(String userId, String friendUsername) async {
+  Future<Map<String, dynamic>> removeFriend(String friendUsername) async {
     final response = await apiClient.post('/friends/remove', {
-      "user_id": userId,
       "friend_username": friendUsername,
     });
 

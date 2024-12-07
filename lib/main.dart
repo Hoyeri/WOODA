@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wooda_client/src/app.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +41,16 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
+      // locale: Locale('ko', 'KR'), // 한국어를 기본 로케일로 설정
+      // supportedLocales: [
+      //   Locale('en', 'US'), // 영어
+      //   Locale('ko', 'KR'), // 한국어
+      // ],
+      // localizationsDelegates: [
+      //   GlobalMaterialLocalizations.delegate,
+      //   GlobalWidgetsLocalizations.delegate,
+      //   GlobalCupertinoLocalizations.delegate,
+      // ],
       home: const App(),
     );
   }
