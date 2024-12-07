@@ -8,6 +8,8 @@ import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
 import 'package:wooda_client/src/screens/add_schedule_page.dart';
 import 'package:wooda_client/src/services/items_service.dart';
+import 'package:wooda_client/src/services/friends_service.dart';
+import 'package:wooda_client/src/screens/friends_page.dart';
 import 'package:wooda_client/src/models/items_model.dart';
 import 'package:wooda_client/src/services/api_client_singleton.dart';
 
@@ -20,6 +22,7 @@ class AppScreen extends StatefulWidget {
 
 class _AppScreenState extends State<AppScreen> {
   final ItemsService _itemsService = ItemsService(apiClient);
+  final FriendsService _friendsService = FriendsService(apiClient); // FriendsService 추가
   CalendarFormat format = CalendarFormat.week;
   int _currentIndex = 1;
   DateTime selectedDay = DateTime.now();
@@ -427,7 +430,21 @@ class _AppScreenState extends State<AppScreen> {
                 ),
               ),
             );
+          } else if (index == 2) {
+            // 친구들로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FriendsPage(
+                  friends: _friendsService.getFriends(), // 실제 사용자 ID 사용
+                  onSubscribe: (username) async {
+                    await _friendsService.addFriend(username);
+                  },
+                ),
+              ),
+            );
           } else {
+            // 현재 페이지 (나의 일상) 유지
             setState(() {
               _currentIndex = index;
             });

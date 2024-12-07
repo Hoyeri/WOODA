@@ -1,23 +1,26 @@
-/// Friend 모델 클래스
 class Friend {
   final int id;
-  final String username;
+  final String userName;
 
-  Friend({required this.id, required this.username});
+  Friend({
+    required this.id,
+    required this.userName,
+  });
 
-  // JSON 데이터를 Friend 객체로 변환하는 생성자
+  // JSON 데이터를 Friend 객체로 변환
   factory Friend.fromJson(Map<String, dynamic> json) {
     return Friend(
-      id: json['id'],
-      username: json['username'],
+      id: json["id"] as int,
+      userName: json["username"], // 서버에서 반환되는 키 이름
     );
   }
 
-  // Friend 객체를 JSON 데이터로 변환하는 메서드
+  // Friend 객체를 JSON으로 변환
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'username': username,
+      "id": id,
+      "username": userName,
     };
   }
 }
+

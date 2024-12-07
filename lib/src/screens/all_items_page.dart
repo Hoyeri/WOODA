@@ -6,6 +6,8 @@ import 'package:wooda_client/src/services/api_client_singleton.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/app_screen.dart';
 import 'package:wooda_client/src/components/image_data.dart';
+import 'package:wooda_client/src/screens/friends_page.dart';
+import 'package:wooda_client/src/services/friends_service.dart';
 import 'package:wooda_client/src/services/items_service.dart';
 import 'package:wooda_client/src/screens/comment_page.dart';
 
@@ -30,6 +32,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
   int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
   DateTime _startDate = _calculateStartDate(DateTime.now());
+  final FriendsService _friendsService = FriendsService(apiClient); // FriendsService 추가
   final ScrollController _scrollController = ScrollController();
   late final ItemsService itemsService = ItemsService(apiClient);
   List<Item> items = [];
@@ -477,7 +480,21 @@ class _AllItemsPageState extends State<AllItemsPage> {
                       builder: (context) => AppScreen(),
                     ),
                   );
+                } else if (index == 2) {
+                  // 친구들로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FriendsPage(
+                        friends: _friendsService.getFriends(), // 실제 사용자 ID 사용
+                        onSubscribe: (username) async {
+                          await _friendsService.addFriend(username);
+                        },
+                      ),
+                    ),
+                  );
                 } else {
+                  // 현재 페이지 (나의 일상) 유지
                   setState(() {
                     _currentIndex = index;
                   });
