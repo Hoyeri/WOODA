@@ -128,19 +128,21 @@ class _AllItemsPageState extends State<AllItemsPage> {
 
   Widget _buildDaySchedule(DateTime day, List<Item> daySchedules) {
     return Container(
-      padding: const EdgeInsets.only(left: 20),
-      width: 180,
-      margin: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      width: 200, // UI에 고정된 폭
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 날짜 표시
-          Text(
-            DateFormat('EEEE, MM.dd', 'ko_KR').format(day),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              DateFormat('EEEE, MMM d', 'ko_KR').format(day), // 날짜 포맷
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          // 일정 표시 또는 "일정 없음" 메시지
           daySchedules.isEmpty
               ? const Center(
             child: Padding(
@@ -157,16 +159,110 @@ class _AllItemsPageState extends State<AllItemsPage> {
           )
               : ListView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: daySchedules.length,
             itemBuilder: (context, index) {
-              final item = daySchedules[index];
-              return Text(item.title); // 일정 제목 출력
+              final schedule = daySchedules[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailPage(
+                        itemsService: itemsService,
+                        item: schedule,
+                        model: DetailPageModel(
+                          id: schedule.id,
+                          title: schedule.title,
+                          description: schedule.description,
+                          date: schedule.date,
+                          image: schedule.image,
+                        ),
+                        onDelete: () {
+                          widget.onDelete(schedule.id);
+                          setState(() {});
+                        },
+                        onUpdate: (updatedSchedule) {
+                          widget.onUpdate(updatedSchedule);
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: 4.0,
+                    child: SizedBox(
+                      height: 120, // 일정 카드의 고정 높이
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: AssetImage(
+                                      'assets/images/profile_default.png'),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        schedule.title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        DateFormat('HH:mm')
+                                            .format(schedule.date),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              schedule.description,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
             },
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildDiaryItem(Item item) {
     final isLiked = item.likes_users.contains("user123");
@@ -265,7 +361,8 @@ class _AllItemsPageState extends State<AllItemsPage> {
         final schedulesByDay = List.generate(7, (index) {
           final day = _startDate.add(Duration(days: index));
           final daySchedules = items.where((schedule) {
-            return schedule.date.day == day.day &&
+            return schedule.type == "schedule" && // "schedule" 타입 필터링
+                schedule.date.day == day.day &&
                 schedule.date.month == day.month &&
                 schedule.date.year == day.year;
           }).toList();
@@ -319,12 +416,29 @@ class _AllItemsPageState extends State<AllItemsPage> {
                 },
               ),
             ),
-            body: _selectedTabIndex == 1
-                ? _buildWeeklySchedulesView(items, schedulesByDay)
-                : _selectedTabIndex == 2
-                ? _buildDiaryListView(items)
-                : const Center(child: Text("표시할 내용이 없습니다.")),
-            // Bottom Navigation Bar
+            body: Stack(
+              children: [
+                // 배경 이미지
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/background_04.png',
+                    fit: BoxFit.cover, // 이미지를 화면 크기에 맞게 확장 또는 축소
+                    alignment: Alignment.topCenter,
+                  ),
+                ),
+                Column(
+                  children: [
+                    Expanded(
+                      child: _selectedTabIndex == 0
+                          ? const Center(child: Text("디데이 탭 내용"))
+                          : _selectedTabIndex == 1
+                          ? _buildWeeklySchedulesView(items, schedulesByDay)
+                          : _buildDiaryListView(items),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
@@ -366,7 +480,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
             ),
           ),
         );
-    }
+      },
     );
   }
 
@@ -384,7 +498,9 @@ class _AllItemsPageState extends State<AllItemsPage> {
                 final daySchedules = dayData['schedules'] as List<Item>;
                 final day = dayData['date'] as DateTime;
 
-                return _buildDaySchedule(day, daySchedules);
+                // "schedule" 타입의 항목만 전달
+                final filteredSchedules = daySchedules.where((schedule) => schedule.type == "schedule").toList();
+                return _buildDaySchedule(day, filteredSchedules);
               }),
             ),
           ),
@@ -392,6 +508,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
       ],
     );
   }
+
 
   Widget _buildDiaryListView(List<Item> items) {
     return FutureBuilder<List<Item>>(
@@ -429,9 +546,26 @@ class _AllItemsPageState extends State<AllItemsPage> {
                         image: item.image,
                       ),
                       onDelete: () {
-                        widget.onDelete(item.id);
-                        setState(() {}); // 삭제 후 화면 갱신
+                        try {
+                          // 부모 위젯의 onDelete 호출
+                          widget.onDelete(item.id); // 반환값이 없으므로 await 제거
+
+                          // 로컬 상태 업데이트 및 UI 강제 갱신
+                          setState(() {
+                            items.removeWhere((i) => i.id == item.id); // 로컬 목록에서 제거
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("항목이 성공적으로 삭제되었습니다.")),
+                          );
+                        } catch (e) {
+                          // 삭제 실패 알림
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("삭제 실패: $e")),
+                          );
+                        }
                       },
+
                       onUpdate: (updatedSchedule) {
                         widget.onUpdate(updatedSchedule);
                         setState(() {}); // 업데이트 후 화면 갱신
@@ -488,7 +622,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
                               child: Text(
                                 "${item.date.year}/${item.date.month.toString().padLeft(2, '0')}/${item.date.day.toString().padLeft(2, '0')}",
                                 style: const TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: Colors.grey,
                                 ),
                               ),
@@ -498,7 +632,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
                             Text(
                               item.title,
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 17,
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.center,
@@ -511,7 +645,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: Colors.grey,
                               ),
                             ),
