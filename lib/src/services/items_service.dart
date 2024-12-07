@@ -6,14 +6,25 @@ import 'package:wooda_client/src/services/api_client.dart';
 class ItemsService extends ChangeNotifier{
   final ApiClient apiClient;
   final Map<int, int> _commentCounts = {}; // 각 항목의 댓글 수
+  final Map<int, int> _likes = {}; // 각 항목의 좋아요 수
   final Map<int, Set<String>> _likesUsers = {}; // 각 항목의 좋아요 상태
 
   ItemsService(this.apiClient);
 
-  Future<void> updateCommentCount(int itemId, int count) async {
-    _commentCounts[itemId] = count;
-    notifyListeners();
+
+
+  Future<int> getLikes(int itemId) async {
+    try {
+      final item = await getItemById(itemId);
+
+      return item.likes;
+    } catch (e) {
+      print("Error fetching likes for itemId $itemId: $e");
+      return 0; // 기본값 0
+    }
   }
+
+
 
   int getCommentCount(int itemId) {
     return _commentCounts[itemId] ?? 0;

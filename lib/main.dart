@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:wooda_client/src/app.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR', '');

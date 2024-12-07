@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wooda_client/src/components/image_data.dart';
@@ -356,18 +358,21 @@ class _AppScreenState extends State<AppScreen> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                item.title,
-                                style: TextStyle(
+                              Flexible(
+                                child: Text(
+                                  item.title,
+                                  style: const TextStyle(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.w600
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis, // 텍스트 넘침 처리
+                                  maxLines: 1,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4), // 간격을 줄이거나 제거
                               Text(
                                 "${item.date.hour}:${item.date.minute.toString().padLeft(2, '0')}",
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                                style: const TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -384,17 +389,19 @@ class _AppScreenState extends State<AppScreen> {
                     ),
                     const SizedBox(width: 8),
                     // 이미지 미리보기
+                    // 이미지 미리보기
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: (item.image != null && item.image!.isNotEmpty)
-                          ? Image.asset(
-                        item.image!,
+                          ? Image.file(
+                        File(item.image!), // File 객체를 생성하여 Image.file로 로드
                         width: 80, // 이미지 폭
                         height: 90, // 카드의 전체 높이에 맞춤
                         fit: BoxFit.cover,
                       )
-                          : SizedBox(width: 80, height: 90),
+                          : SizedBox(width: 80, height: 90), // 기본 크기 설정
                     ),
+
                   ],
                 ),
               ),

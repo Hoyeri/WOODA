@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -155,16 +157,24 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        if (widget.model.image != null)
+                        if (widget.model.image != null && widget.model.image!.isNotEmpty)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
+                            child: widget.model.image!.startsWith('http')
+                                ? Image.network(
                               widget.model.image!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 400,
+                            )
+                                : Image.file(
+                              File(widget.model.image!),
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: 400,
                             ),
                           ),
+
                       ],
                     ),
                   ),
