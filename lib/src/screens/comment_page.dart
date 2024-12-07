@@ -175,7 +175,7 @@ class _CommentPageState extends State<CommentPage> {
                                     child: const Text(
                                       "답글 달기",
                                       style: TextStyle(
-                                        color: Colors.blue,
+                                        color: Colors.grey,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -245,7 +245,7 @@ class _CommentPageState extends State<CommentPage> {
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.send, color: Colors.blue),
+                      icon: const Icon(Icons.send, color: Color(0xffFF5987)),
                       onPressed: () => _addComment(_controller.text),
                     ),
                   ],

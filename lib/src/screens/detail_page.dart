@@ -44,13 +44,10 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _loadCommentCount() async {
-    try {
       final comments = await widget.itemsService.getComments(widget.item.id);
       setState(() {
         commentCount = comments.length;
       });
-    } catch (e) {
-    }
   }
 
   void toggleLike() async {

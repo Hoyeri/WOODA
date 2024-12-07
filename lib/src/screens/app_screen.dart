@@ -103,14 +103,6 @@ class _AppScreenState extends State<AppScreen> {
     );
 
     if (dateTimeResult != null && dateTimeResult is Map<String, dynamic>) {
-      final dateTime = DateTime(
-        dateTimeResult["date"].year,
-        dateTimeResult["date"].month,
-        dateTimeResult["date"].day,
-        dateTimeResult["time"].hour,
-        dateTimeResult["time"].minute,
-      );
-
       final itemResult = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => AddItemPage(dateTime: selectedDay)),

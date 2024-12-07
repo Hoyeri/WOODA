@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 
 class ImageData extends StatelessWidget {
-  String icon;
+  final String icon;
   final double? width;
   ImageData(
       this.icon, {

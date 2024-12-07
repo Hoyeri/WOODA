@@ -46,6 +46,23 @@ class _FriendsPageState extends State<FriendsPage> {
     }
   }
 
+  void _removeFriend(String username) async {
+    try {
+      await _friendsService.removeFriend(username); // 친구 삭제 호출
+      setState(() {
+        friends.removeWhere((friend) => friend.userName == username);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("$username님을 삭제했습니다!")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("친구 삭제 실패: $e")),
+      );
+    }
+  }
+
+
   void _showAddFriendDialog(BuildContext context) {
     String username = "";
 
@@ -69,18 +86,17 @@ class _FriendsPageState extends State<FriendsPage> {
               onPressed: () async {
                 if (username.isNotEmpty) {
                   try {
-                    // FriendsService의 addFriend 호출
                     await _friendsService.addFriend(username);
-
                     Navigator.of(context).pop(); // 다이얼로그 닫기
                     ScaffoldMessenger.of(this.context).showSnackBar(
                       SnackBar(content: Text("$username님이 추가되었습니다!")),
                     );
-
-                    // 친구 목록 갱신
-                    _fetchFriends();
+                    final updatedFriends = await _friendsService.getFriends();
+                    setState(() {
+                      friends = updatedFriends; // UI 갱신을 위해 상태 업데이트
+                    }); // 친구 목록 갱신
                   } catch (e) {
-                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                    Navigator.of(context).pop();
                     ScaffoldMessenger.of(this.context).showSnackBar(
                       SnackBar(content: Text("친구 추가 실패: $e")),
                     );
@@ -108,21 +124,22 @@ class _FriendsPageState extends State<FriendsPage> {
         actions: [
           IconButton(
             onPressed: () {
-              _showAddFriendDialog(context); // 친구 추가 다이얼로그 호출
+              _showAddFriendDialog(context);
+              setState(() {
+              });
             },
             icon: const Icon(
               Icons.person_add,
-              color: Colors.black, // 아이콘 색상 조정
-              size: 24, // 아이콘 크기 조정
+              color: Colors.black,
+              size: 24,
             ),
-            tooltip: "친구 추가", // 접근성 및 툴팁 추가
+            tooltip: "친구 추가",
           ),
           SizedBox(width: 20)
         ],
       ),
       body: Stack(
         children: [
-          // 배경 이미지
           Positioned.fill(
             child: Image.asset(
               'assets/images/background_04.png',
@@ -130,7 +147,6 @@ class _FriendsPageState extends State<FriendsPage> {
               alignment: Alignment.topCenter,
             ),
           ),
-          // 친구 목록 UI
           friends.isEmpty
               ? Center(
             child: const Text(
@@ -152,8 +168,8 @@ class _FriendsPageState extends State<FriendsPage> {
                 child: ListTile(
                   leading: CircleAvatar(
                     radius: 24,
-                    backgroundImage: AssetImage(
-                        'assets/images/profile_default.png'),
+                    backgroundImage:
+                    AssetImage('assets/images/profile_default.png'),
                   ),
                   title: Text(
                     friend.userName,
@@ -169,6 +185,39 @@ class _FriendsPageState extends State<FriendsPage> {
                       color: Colors.grey,
                     ),
                   ),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                      _removeFriend(friend.userName); // 친구 삭제 호출
+                      setState(() {
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffFF5987), // 기존 구독 버튼 색상
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // 둥근 테두리
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // 버튼 안쪽 여백
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min, // 버튼 크기를 텍스트와 아이콘에 맞게 조절
+                      children: const [
+                        Text(
+                          "삭제",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 2),
+                        Icon(
+                          Icons.delete_forever, // 삭제 아이콘
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
@@ -180,7 +229,7 @@ class _FriendsPageState extends State<FriendsPage> {
         showSelectedLabels: true,
         showUnselectedLabels: false,
         backgroundColor: Colors.white,
-        currentIndex: _currentIndex, // 디폴트 버튼 == '나의 일상'
+        currentIndex: _currentIndex,
         onTap: (index) {
           if (index == 0) {
             Navigator.push(
@@ -201,12 +250,11 @@ class _FriendsPageState extends State<FriendsPage> {
               ),
             );
           } else if (index == 2) {
-            // 친구들로 이동
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => FriendsPage(
-                  friends: _friendsService.getFriends(), // 실제 사용자 ID 사용
+                  friends: _friendsService.getFriends(),
                   onSubscribe: (username) async {
                     await _friendsService.addFriend(username);
                   },
@@ -214,7 +262,6 @@ class _FriendsPageState extends State<FriendsPage> {
               ),
             );
           } else {
-            // 현재 페이지 (나의 일상) 유지
             setState(() {
               _currentIndex = index;
             });

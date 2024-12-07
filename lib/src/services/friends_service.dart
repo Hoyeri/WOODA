@@ -12,8 +12,6 @@ class FriendsService {
   Future<List<Friend>> getFriends() async {
     final response = await apiClient.get('/friends/list'); // '/list' 경로로 요청
     if (response.statusCode == 200) {
-      print(response.body);
-      print(jsonDecode(response.body));
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Friend.fromJson(json)).toList(); // JSON을 Friend 객체로 변환
     } else {
@@ -40,9 +38,8 @@ class FriendsService {
   }
 
   // 친구 삭제
-  Future<Map<String, dynamic>> removeFriend(String userId, String friendUsername) async {
+  Future<Map<String, dynamic>> removeFriend(String friendUsername) async {
     final response = await apiClient.post('/friends/remove', {
-      "user_id": userId,
       "friend_username": friendUsername,
     });
 
