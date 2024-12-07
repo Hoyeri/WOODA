@@ -1,11 +1,27 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:wooda_client/src/models/items_model.dart';
 import 'package:wooda_client/src/services/api_client.dart';
 
-class ItemsService {
+class ItemsService extends ChangeNotifier{
   final ApiClient apiClient;
+  final Map<int, int> _commentCounts = {}; // 각 항목의 댓글 수
+  final Map<int, Set<String>> _likesUsers = {}; // 각 항목의 좋아요 상태
 
   ItemsService(this.apiClient);
+
+  Future<void> updateCommentCount(int itemId, int count) async {
+    _commentCounts[itemId] = count;
+    notifyListeners();
+  }
+
+  int getCommentCount(int itemId) {
+    return _commentCounts[itemId] ?? 0;
+  }
+
+  bool isLiked(int itemId, String userId) {
+    return _likesUsers[itemId]?.contains(userId) ?? false;
+  }
 
   Future<Map<String, dynamic>> createItem({
     required String type, // "schedule" or "diary"
@@ -117,6 +133,17 @@ class ItemsService {
     return date1.year == date2.year &&
         date1.month == date2.month &&
         date1.day == date2.day;
+  }
+
+  Future<Item> getItemById(int itemId) async {
+    final response = await apiClient.get('/items/$itemId');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return Item.fromJson(data); // JSON 데이터를 Item 객체로 변환
+    } else {
+      throw Exception("Failed to fetch item by ID: ${response.body}");
+    }
   }
 
   Future<List<Item>> getFilteredItems(DateTime selectedDay) async {

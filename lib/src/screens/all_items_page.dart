@@ -32,6 +32,7 @@ class _AllItemsPageState extends State<AllItemsPage> {
   DateTime _startDate = _calculateStartDate(DateTime.now());
   final ScrollController _scrollController = ScrollController();
   late final ItemsService itemsService = ItemsService(apiClient);
+  List<Item> items = [];
 
 
   // 현재 주의 시작 날짜 계산 함수
@@ -61,16 +62,52 @@ class _AllItemsPageState extends State<AllItemsPage> {
 
   void _fetchItems() async {
     try {
-      final items = await widget.items; // 서버로부터 아이템 목록 가져오기
+      final fetchedItems = await widget.items;
       setState(() {
-        for (var item in items) {
-          // 서버에서 좋아요 상태를 갱신
-          item.likes_users = item.likes_users; // 서버에서 받아온 좋아요 상태
-        }
+        items = fetchedItems;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("아이템 가져오기 실패: $e")),
+      );
+    }
+  }
+
+
+  void _updateSchedule(Item updatedSchedule) async {
+    try {
+      await itemsService.updateItem(updatedSchedule);
+      final updatedItems = await getFilteredAndSortedSchedules("diary", items);
+
+      setState(() {
+        items = updatedItems;
+        });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("일정이 성공적으로 수정되었습니다.")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("수정 실패: $e")),
+      );
+    }
+  }
+
+  void _deleteSchedule(int id) async {
+    try {
+      await itemsService.deleteItem(id);
+
+      setState(() {
+        items.removeWhere((item) => item.id == id);
+        _fetchItems();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("일정이 성공적으로 삭제되었습니다.")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("삭제 실패: $e")),
       );
     }
   }
@@ -178,17 +215,11 @@ class _AllItemsPageState extends State<AllItemsPage> {
                           date: schedule.date,
                           image: schedule.image,
                         ),
-                        onDelete: () {
-                          widget.onDelete(schedule.id);
-                          setState(() {});
-                        },
-                        onUpdate: (updatedSchedule) {
-                          widget.onUpdate(updatedSchedule);
-                          setState(() {});
-                        },
+                        onDelete: () => _deleteSchedule(schedule.id),
+                        onUpdate: (updatedSchedule) => _updateSchedule(updatedSchedule),
                       ),
-                    ),
-                  );
+                    )
+                  ).then((_) {_fetchItems();});
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -283,14 +314,9 @@ class _AllItemsPageState extends State<AllItemsPage> {
                 date: item.date,
                 image: item.image,
               ),
-              onDelete: () {
-                widget.onDelete(item.id); // 부모로부터 전달된 함수 호출
-                setState(() {}); // 삭제 후 화면 갱신
-              },
-              onUpdate: (updatedSchedule) {
-                widget.onUpdate(updatedSchedule); // 부모로부터 전달된 함수 호출
-                setState(() {}); // 업데이트 후 화면 갱신
-              },
+              onDelete: () { _deleteSchedule(item.id); _fetchItems();},
+              onUpdate: (updatedSchedule) {_updateSchedule(updatedSchedule); _fetchItems();}
+              ,
             ),
           ),
         );
@@ -352,8 +378,6 @@ class _AllItemsPageState extends State<AllItemsPage> {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('오류 발생: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('표시할 일정이 없습니다.'));
         }
 
         final items = snapshot.data!;

@@ -1,9 +1,6 @@
-/// edit_schedule_page.dart
-library;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/items_model.dart';
-
 
 class EditSchedulePage extends StatefulWidget {
   final Item schedule;
@@ -25,13 +22,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   late DateTime _selectedDate;
   String? _imagePath;
 
-
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.schedule.title);
-    _descriptionController =
-        TextEditingController(text: widget.schedule.description);
+    _descriptionController = TextEditingController(text: widget.schedule.description);
     _selectedDate = widget.schedule.date;
     _imagePath = widget.schedule.image;
   }
@@ -43,18 +38,22 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     super.dispose();
   }
 
-
   void _submitChanges() {
-    Item updatedSchedule = Item( /// schedule 객체로 변경
-      id: widget.schedule.id, // 기존 ID 유지
+    // 업데이트된 Item 객체 생성
+    Item updatedSchedule = Item(
+      id: widget.schedule.id,
       type: widget.schedule.type,
       user_id: widget.schedule.user_id,
       title: _titleController.text,
       description: _descriptionController.text,
-      date: widget.schedule.date,
-      image: widget.schedule.image, // 이미지 변경 없이 기존 이미지 유지
+      date: _selectedDate, // 수정된 날짜를 반영
+      image: widget.schedule.image,
     );
+
+    // 부모 위젯의 onUpdate 호출
     widget.onUpdate(updatedSchedule);
+
+    // 변경 사항 반영 후 화면 종료
     Navigator.pop(context);
   }
 
@@ -127,7 +126,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               ),
             ),
           ),
-          // 나머지 UI 그대로 유지
           Expanded(
             child: Stack(
               children: [
