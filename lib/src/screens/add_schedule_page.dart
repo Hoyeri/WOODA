@@ -20,7 +20,6 @@ class _AddItemPageState extends State<AddItemPage> {
   final ItemsService itemsService = ItemsService(apiClient); // 에뮬레이터용 URL
 
   Future<void> saveItem() async {
-    print("Selected Date: ${widget.dateTime.toIso8601String()}"); // 로그 추가
 
     try {
       final response = await itemsService.createItem(
@@ -45,7 +44,6 @@ class _AddItemPageState extends State<AddItemPage> {
         );
       }
     } catch (e) {
-      print("Error saving item: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("저장 실패: $e")),
       );

@@ -7,6 +7,8 @@ class Item {
   final String description;
   final String? image;
   int likes; // 좋아요 수
+  Set<String> likes_users;
+  int commentsCount;
 
   Item({
     required this.id,
@@ -16,12 +18,13 @@ class Item {
     required this.date,
     required this.description,
     this.image,
-    this.likes = 0, // 기본값 0
+    this.likes = 0,
+    this.likes_users = const {},
+    this.commentsCount = 0,
   });
 
   // JSON 데이터를 Item 객체로 변환
   factory Item.fromJson(Map<String, dynamic> json) {
-    print("변환 중인 JSON 데이터: $json");
     try {
       return Item(
         id: json["id"],
@@ -32,9 +35,12 @@ class Item {
         description: json["description"] as String,
         image: json["image"] != null ? json["image"] as String : null,
         likes: json["likes"] ?? 0,
+        likes_users: json["likes_users"] != null
+            ? Set<String>.from(json["likes_users"]) // JSON 배열을 Set으로 변환
+            : {},
+        commentsCount: json["comments_count"] ?? 0,
       );
     } catch (e) {
-      print("Item 변환 오류: $e, 문제의 JSON 데이터: $json");
       rethrow;
     }
   }
@@ -49,6 +55,7 @@ class Item {
       "description": description,
       "image": image,
       "likes": likes, // 좋아요 수 저장
+      "likes_users": likes_users.toList(), // Set을 List로 변환하여 JSON에 저장
     };
   }
 }

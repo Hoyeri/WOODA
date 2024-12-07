@@ -38,10 +38,6 @@ class ItemsService {
     final dateStr = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
     final response = await apiClient.get('/items/by-date?date=$dateStr');
 
-    // API 응답 상태 코드와 바디를 로그로 출력
-    print("API 응답 상태 코드: ${response.statusCode}");
-    print("API 응답 바디: ${response.body}");
-
     if (response.statusCode == 200) {
       try {
         final List<dynamic> data = jsonDecode(response.body);
@@ -50,7 +46,6 @@ class ItemsService {
           try {
             return Item.fromJson(json);
           } catch (e) {
-            print("Item 변환 오류: $e, 문제의 JSON 데이터: $json");
             rethrow;
           }
         }).toList();
@@ -128,4 +123,45 @@ class ItemsService {
     final items = await getItems();
     return items.where((item) => isSameDay(item.date, selectedDay)).toList();
   }
+
+  Future<void> toggleLike(Item item) async {
+    final response = await apiClient.post('/items/toggle-like/${item.id}', {
+      "item_id": item.id,
+    });
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to toggle like: ${response.body}");
+    }
+  }
+
+  // 댓글 추가
+  Future<void> addComment(int itemId, String content) async {
+    final response = await apiClient.post('/comments/add', {
+      "item_id": itemId,
+      "content": content,
+    });
+
+    if (response.statusCode != 201) {
+      throw Exception("Failed to add comment: ${response.body}");
+    }
+  }
+
+  // 댓글 조회
+  Future<List<dynamic>> getComments(int itemId) async {
+    final response = await apiClient.get('/comments/$itemId');
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch comments: ${response.body}");
+    }
+  }
+
+  // 댓글 삭제
+  Future<void> deleteComment(int commentId) async {
+    final response = await apiClient.delete('/comments/delete/$commentId');
+    if (response.statusCode != 200) {
+      throw Exception("Failed to delete comment: ${response.body}");
+    }
+  }
+
 }

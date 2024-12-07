@@ -1,6 +1,3 @@
-/// detail_page.dart
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -8,16 +5,14 @@ import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/models/items_model.dart';
 import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 import 'package:wooda_client/src/screens/comment_page.dart';
-
-// 전역 상태: 스케줄 ID별 좋아요 누른 사용자 관리
-Map<int, Set<String>> userLikes = {};
-Map<int, List<Map<String, dynamic>>> itemComments = {};
+import 'package:wooda_client/src/services/items_service.dart';
 
 class DetailPage extends StatefulWidget {
   final DetailPageModel model;
   final Item item;
   final void Function(Item) onUpdate;
   final void Function() onDelete;
+  final ItemsService itemsService; // ItemsService 추가
 
   const DetailPage({
     super.key,
@@ -25,6 +20,7 @@ class DetailPage extends StatefulWidget {
     required this.onDelete,
     required this.onUpdate,
     required this.item,
+    required this.itemsService,
   });
 
   @override
@@ -33,33 +29,43 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   late bool isLiked;
+  int commentCount = 0;
 
   @override
   void initState() {
     super.initState();
     const currentUserId = "user123";
 
-    // 좋아요 여부 확인 및 초기화
-    isLiked = userLikes[widget.item.id]?.contains(currentUserId) ?? false;
-    itemComments.putIfAbsent(widget.item.id, () => []);
+    // 좋아요 여부 초기화
+    isLiked = widget.item.likes_users.contains(currentUserId);
+
+    // 초기 댓글 수 로드
+    _loadCommentCount();
   }
 
-  void toggleLike() {
-    setState(() {
-      const currentUserId = "user123";
+  Future<void> _loadCommentCount() async {
+    try {
+      final comments = await widget.itemsService.getComments(widget.item.id);
+      setState(() {
+        commentCount = comments.length;
+      });
+    } catch (e) {
+    }
+  }
 
-      if (isLiked) {
-        userLikes[widget.item.id]?.remove(currentUserId);
-        widget.item.likes--;
-      } else {
-        userLikes.putIfAbsent(widget.item.id, () => {});
-        userLikes[widget.item.id]!.add(currentUserId);
-        widget.item.likes++;
-      }
-
-      isLiked = !isLiked;
-      widget.onUpdate(widget.item); // 변경 사항 전달
-    });
+  void toggleLike() async {
+    try {
+      await widget.itemsService.toggleLike(widget.item);
+      setState(() {
+        isLiked = !isLiked;
+        widget.item.likes += isLiked ? 1 : -1;
+      });
+      widget.onUpdate(widget.item); // 변경 사항 부모 위젯에 전달
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("좋아요 실패: $e")),
+      );
+    }
   }
 
   @override
@@ -89,14 +95,8 @@ class _DetailPageState extends State<DetailPage> {
                     builder: (context) => EditSchedulePage(
                       schedule: widget.item,
                       onUpdate: (updatedSchedule) {
-                        // 기존 likes 값을 수정된 스케줄에 반영
-                        updatedSchedule.likes = widget.item.likes;
-
-                        // 기존 userLikes 상태 유지
-                        userLikes[updatedSchedule.id] = userLikes[widget.item.id] ?? {};
-
                         widget.onUpdate(updatedSchedule);
-                        Navigator.pop(context); // 수정 후 복귀
+                        Navigator.pop(context);
                       },
                     ),
                   ),
@@ -127,7 +127,7 @@ class _DetailPageState extends State<DetailPage> {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                color: Colors.white.withOpacity(0.8), // 배경 투명도 설정
+                color: Colors.white.withOpacity(0.8),
                 child: Text(
                   formattedDate,
                   style: const TextStyle(fontSize: 15, color: Colors.grey),
@@ -136,11 +136,11 @@ class _DetailPageState extends State<DetailPage> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Container( // 텍스트가 왼쪽에 정렬되도록 컨테이너 사용
-                    alignment: Alignment.topLeft, // 컨테이너 내에서 왼쪽 정렬
+                  child: Container(
+                    alignment: Alignment.topLeft,
                     padding: const EdgeInsets.all(35),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start, // Column의 하위 위젯을 왼쪽 정렬
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.model.title,
@@ -154,7 +154,7 @@ class _DetailPageState extends State<DetailPage> {
                           widget.model.description,
                           style: const TextStyle(
                             fontSize: 15,
-                            height: 1.5, // 줄 간격 설정
+                            height: 1.5,
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -201,27 +201,24 @@ class _DetailPageState extends State<DetailPage> {
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
-                              builder: (context) {
+                              builder: (BuildContext context) {
                                 return CommentPage(
-                                  initialComments: itemComments[widget.item.id]!,
-                                  onCommentsUpdated: (updatedComments) {
-                                    // 댓글 리스트를 업데이트하여 전역 상태에 반영
-                                    setState(() {
-                                      itemComments[widget.item.id] = updatedComments;
-                                    });
-                                  },
+                                  itemId: widget.item.id, // 댓글과 연결된 Item ID
+                                  itemsService: widget.itemsService, // 댓글 관리 서비스
                                 );
                               },
-                            );
+                            ).then((updatedCommentsCount) {
+                              if (updatedCommentsCount != null) {
+                                setState(() {
+                                  widget.item.commentsCount = updatedCommentsCount; // 댓글 수 갱신
+                                });
+                              }
+                            });
                           },
                         ),
-                        Text(
-                            '${itemComments[widget.item.id]?.length ?? 0}',
-                            style: const TextStyle(fontSize: 16)
-                        )
+                        Text('$commentCount', style: const TextStyle(fontSize: 16)),
                       ],
-                    )
-
+                    ),
                   ],
                 ),
               ),

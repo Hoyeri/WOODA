@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:wooda_client/src/screens/all_schedules_page.dart';
+import 'package:wooda_client/src/screens/all_items_page.dart';
 import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
@@ -34,14 +34,11 @@ class _AppScreenState extends State<AppScreen> {
 
   Future<void> _loadItems(DateTime selectedDate) async {
     try {
-      print("Loading items for date: $selectedDate");
       final data = await _itemsService.getItemsByDate(selectedDate);
-      print("Loaded items: ${data.map((item) => item.toString()).toList()}");
       setState(() {
         items = data;
       });
     } catch (e) {
-      print("Error loading items: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error loading items: $e")),
       );
@@ -131,7 +128,6 @@ class _AppScreenState extends State<AppScreen> {
             await _loadItems(selectedDay);
 
             // 데이터 반영 확인용 디버깅 로그
-            print("Item added: ${itemResult['title']}");
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Item added successfully")),
             );
@@ -139,7 +135,6 @@ class _AppScreenState extends State<AppScreen> {
             throw Exception(response['message']);
           }
         } catch (e) {
-          print("Error adding item: $e");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error adding item: $e")),
           );
@@ -303,6 +298,7 @@ class _AppScreenState extends State<AppScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailPage(
+                      itemsService: _itemsService,
                       item: item,
                       model: DetailPageModel(
                         id: item.id,
@@ -424,7 +420,7 @@ class _AppScreenState extends State<AppScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AllSchedulesPage(
+                builder: (context) => AllItemsPage(
                   items: _itemsService.getItems(),
                   onUpdate: _itemsService.updateItem,
                   onDelete: _itemsService.deleteItem,

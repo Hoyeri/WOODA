@@ -7,29 +7,32 @@ import 'package:wooda_client/src/screens/detail_page.dart';
 import 'package:wooda_client/src/screens/app_screen.dart';
 import 'package:wooda_client/src/components/image_data.dart';
 import 'package:wooda_client/src/services/items_service.dart';
+import 'package:wooda_client/src/screens/comment_page.dart';
 
-class AllSchedulesPage extends StatefulWidget {
+class AllItemsPage extends StatefulWidget {
   final Future<List<Item>> items;
   final void Function(int id) onDelete; // 삭제 함수
   final void Function(Item updatedSchedule) onUpdate;
 
-  const AllSchedulesPage({
+  const AllItemsPage({
     super.key,
     required this.items,
     required this.onUpdate,
     required this.onDelete,
   });
 
+
   @override
-  _AllSchedulesPageState createState() => _AllSchedulesPageState();
+  _AllItemsPageState createState() => _AllItemsPageState();
 }
 
-class _AllSchedulesPageState extends State<AllSchedulesPage> {
+class _AllItemsPageState extends State<AllItemsPage> {
   int _currentIndex = 0; // 현재 BottomNavigationBar 인덱스
   int _selectedTabIndex = 2; // 기본값으로 "일기" 탭 선택
   DateTime _startDate = _calculateStartDate(DateTime.now());
   final ScrollController _scrollController = ScrollController();
   late final ItemsService itemsService = ItemsService(apiClient);
+
 
   // 현재 주의 시작 날짜 계산 함수
   static DateTime _calculateStartDate(DateTime referenceDate) {
@@ -50,18 +53,47 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
     });
   }
 
-  void toggleLike(Item schedule) {
-    setState(() {
-      const currentUserId = "user123"; // 예시 사용자 ID
-      if (userLikes[schedule.id]?.contains(currentUserId) ?? false) {
-        userLikes[schedule.id]?.remove(currentUserId); // 좋아요 제거
-        schedule.likes--; // 좋아요 수 감소
-      } else {
-        userLikes.putIfAbsent(schedule.id, () => {}); // 초기화
-        userLikes[schedule.id]!.add(currentUserId); // 좋아요 추가
-        schedule.likes++; // 좋아요 수 증가
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    _fetchItems();
+  }
+
+  void _fetchItems() async {
+    try {
+      final items = await widget.items; // 서버로부터 아이템 목록 가져오기
+      setState(() {
+        for (var item in items) {
+          // 서버에서 좋아요 상태를 갱신
+          item.likes_users = item.likes_users; // 서버에서 받아온 좋아요 상태
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("아이템 가져오기 실패: $e")),
+      );
+    }
+  }
+
+  void toggleLike(Item item) async {
+    try {
+      await itemsService.toggleLike(item); // 서버에 좋아요 토글 요청
+      setState(() {
+        // 서버 요청이 성공하면 클라이언트 상태 업데이트
+        const currentUserId = "user123"; // 예시 사용자 ID
+        if (item.likes_users.contains(currentUserId)) {
+          item.likes_users.remove(currentUserId);
+          item.likes--; // 좋아요 수 감소v
+        } else {
+          item.likes_users.add(currentUserId);
+          item.likes++; // 좋아요 수 증가
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("좋아요 토글 실패: $e")),
+      );
+    }
   }
 
   Future<List<Item>> getSchedulesForCurrentWeek(List<Item> items) async {
@@ -136,8 +168,8 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
     );
   }
 
-  Widget _buildDiaryItem(Item diary) {
-    final isLiked = userLikes[diary.id]?.contains("user123") ?? false;
+  Widget _buildDiaryItem(Item item) {
+    final isLiked = item.likes_users.contains("user123");
 
     return GestureDetector(
       onTap: () {
@@ -146,16 +178,17 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
           context,
           MaterialPageRoute(
             builder: (context) => DetailPage(
-              item: diary,
+              itemsService: itemsService,
+              item: item,
               model: DetailPageModel(
-                id: diary.id,
-                title: diary.title,
-                description: diary.description,
-                date: diary.date,
-                image: diary.image,
+                id: item.id,
+                title: item.title,
+                description: item.description,
+                date: item.date,
+                image: item.image,
               ),
               onDelete: () {
-                widget.onDelete(diary.id); // 부모로부터 전달된 함수 호출
+                widget.onDelete(item.id); // 부모로부터 전달된 함수 호출
                 setState(() {}); // 삭제 후 화면 갱신
               },
               onUpdate: (updatedSchedule) {
@@ -178,8 +211,8 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(diary.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(diary.description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(item.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(item.description, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -188,9 +221,9 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
                         isLiked ? Icons.favorite : Icons.favorite_border,
                         color: Colors.red,
                       ),
-                      onPressed: () => toggleLike(diary),
+                      onPressed: () => toggleLike(item),
                     ),
-                    Text('${diary.likes} likes'),
+                    Text('${item.likes} likes'),
                   ],
                 ),
               ],
@@ -372,16 +405,189 @@ class _AllSchedulesPageState extends State<AllSchedulesPage> {
           return const Center(child: Text('일기가 없습니다.'));
         }
 
-        final diaries = snapshot.data!;
+        final items = snapshot.data!;
         return ListView.builder(
           padding: const EdgeInsets.all(15),
-          itemCount: diaries.length,
+          itemCount: items.length,
           itemBuilder: (context, index) {
-            final diary = diaries[index];
-            return _buildDiaryItem(diary);
+            final item = items[index];
+            final isLiked = item.likes_users.contains("user123");
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailPage(
+                      itemsService: itemsService,
+                      item: item,
+                      model: DetailPageModel(
+                        id: item.id,
+                        title: item.title,
+                        description: item.description,
+                        date: item.date,
+                        image: item.image,
+                      ),
+                      onDelete: () {
+                        widget.onDelete(item.id);
+                        setState(() {}); // 삭제 후 화면 갱신
+                      },
+                      onUpdate: (updatedSchedule) {
+                        widget.onUpdate(updatedSchedule);
+                        setState(() {}); // 업데이트 후 화면 갱신
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 왼쪽: 사용자 프로필 및 이름
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          child: CircleAvatar(
+                            radius: 24,
+                            backgroundImage: AssetImage(
+                                'assets/images/profile_default.png'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          item.user_id,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // 오른쪽: 카드
+                  Expanded(
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 3,
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // 작성 날짜
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: Text(
+                                "${item.date.year}/${item.date.month.toString().padLeft(2, '0')}/${item.date.day.toString().padLeft(2, '0')}",
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // 제목
+                            Text(
+                              item.title,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            // 내용
+                            Text(
+                              item.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // 하트 및 댓글 버튼
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // 좋아요 수와 아이콘
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        isLiked ? Icons.favorite : Icons.favorite_border,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () => toggleLike(item),
+                                    ),
+                                    Text(
+                                      '${item.likes}',
+                                      style: const TextStyle(
+                                          fontSize: 14, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                // 댓글 수와 아이콘
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.comment_outlined,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          builder: (BuildContext context) {
+                                            return CommentPage(
+                                              itemId: item.id, // 댓글과 연결된 Item ID
+                                              itemsService: itemsService, // 댓글 관리 서비스
+                                            );
+                                          },
+                                        ).then((updatedCommentsCount) {
+                                          if (updatedCommentsCount != null) {
+                                            setState(() {
+                                              item.commentsCount = updatedCommentsCount; // 댓글 수 갱신
+                                            });
+                                          }
+                                        });
+                                      },
+
+
+                                    ),
+                                    Text(
+                                      '${item.commentsCount}',
+                                      style: const TextStyle(
+                                          fontSize: 14, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           },
         );
       },
     );
+
   }
 }
