@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wooda_client/src/models/schedule_model.dart';
+import 'package:wooda_client/src/models/items_model.dart';
 
 class ScheduleCard extends StatelessWidget {
-  final Schedule schedule;
+  final Item schedule;
   final VoidCallback onTap;
 
   const ScheduleCard({super.key, required this.schedule, required this.onTap});

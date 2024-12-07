@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wooda_client/src/screens/add_schedule_page.dart';
 
 class DateTimeSelectionPage extends StatefulWidget {
   const DateTimeSelectionPage({super.key});
@@ -54,14 +55,24 @@ class _DateTimeSelectionPageState extends State<DateTimeSelectionPage> {
             ),
           ),
           const Spacer(),
-          ElevatedButton( ///그냥 버튼으로 수정
+          ElevatedButton(
             onPressed: () {
-              Navigator.pop(context, {
-                "date": selectedDate,
-                "time": selectedTime,
-              });
+              // 선택된 날짜와 시간을 하나의 DateTime으로 변환
+              final DateTime combinedDateTime = DateTime(
+                selectedDate.year,
+                selectedDate.month,
+                selectedDate.day,
+                selectedTime.hour,
+                selectedTime.minute,
+              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddItemPage(dateTime: combinedDateTime),
+                ),
+              );
             },
-            child: const Text("다음 단계로",),
+            child: const Text("다음 단계로"),
           ),
         ],
       ),

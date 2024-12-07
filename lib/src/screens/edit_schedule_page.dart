@@ -2,12 +2,12 @@
 library;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:wooda_client/src/models/schedule_model.dart';
+import 'package:wooda_client/src/models/items_model.dart';
 
 
 class EditSchedulePage extends StatefulWidget {
-  final Schedule schedule;
-  final void Function(Schedule) onUpdate;
+  final Item schedule;
+  final void Function(Item) onUpdate;
 
   const EditSchedulePage({
     super.key,
@@ -24,6 +24,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   late TextEditingController _descriptionController;
   late DateTime _selectedDate;
   String? _imagePath;
+
 
   @override
   void initState() {
@@ -42,14 +43,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     super.dispose();
   }
 
+
   void _submitChanges() {
-    Schedule updatedSchedule = Schedule( /// schedule 객체로 변경
+    Item updatedSchedule = Item( /// schedule 객체로 변경
       id: widget.schedule.id, // 기존 ID 유지
       type: widget.schedule.type,
-      writer: widget.schedule.writer,
+      user_id: widget.schedule.user_id,
       title: _titleController.text,
       description: _descriptionController.text,
-      date: _selectedDate,
+      date: widget.schedule.date,
       image: widget.schedule.image, // 이미지 변경 없이 기존 이미지 유지
     );
     widget.onUpdate(updatedSchedule);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wooda_client/src/services/api_client_singleton.dart';
-import 'package:wooda_client/src/services/services.dart';
+import 'package:wooda_client/src/services/auth_service.dart';
 import 'package:wooda_client/src/screens/login_page.dart';
 
 class SignUpPage extends StatefulWidget {

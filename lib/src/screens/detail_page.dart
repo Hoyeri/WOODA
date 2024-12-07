@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/detail_page_model.dart';
-import 'package:wooda_client/src/models/schedule_model.dart';
+import 'package:wooda_client/src/models/items_model.dart';
 import 'package:wooda_client/src/screens/edit_schedule_page.dart';
 import 'package:wooda_client/src/screens/comment_page.dart';
 
 // 전역 상태: 스케줄 ID별 좋아요 누른 사용자 관리
 Map<int, Set<String>> userLikes = {};
-Map<int, List<Map<String, dynamic>>> scheduleComments = {};
+Map<int, List<Map<String, dynamic>>> itemComments = {};
 
 class DetailPage extends StatefulWidget {
   final DetailPageModel model;
-  final Schedule schedule;
-  final void Function(Schedule) onUpdate;
+  final Item item;
+  final void Function(Item) onUpdate;
   final void Function() onDelete;
 
   const DetailPage({
@@ -24,7 +24,7 @@ class DetailPage extends StatefulWidget {
     required this.model,
     required this.onDelete,
     required this.onUpdate,
-    required this.schedule,
+    required this.item,
   });
 
   @override
@@ -40,8 +40,8 @@ class _DetailPageState extends State<DetailPage> {
     const currentUserId = "user123";
 
     // 좋아요 여부 확인 및 초기화
-    isLiked = userLikes[widget.schedule.id]?.contains(currentUserId) ?? false;
-    scheduleComments.putIfAbsent(widget.schedule.id, () => []);
+    isLiked = userLikes[widget.item.id]?.contains(currentUserId) ?? false;
+    itemComments.putIfAbsent(widget.item.id, () => []);
   }
 
   void toggleLike() {
@@ -49,16 +49,16 @@ class _DetailPageState extends State<DetailPage> {
       const currentUserId = "user123";
 
       if (isLiked) {
-        userLikes[widget.schedule.id]?.remove(currentUserId);
-        widget.schedule.likes--;
+        userLikes[widget.item.id]?.remove(currentUserId);
+        widget.item.likes--;
       } else {
-        userLikes.putIfAbsent(widget.schedule.id, () => {});
-        userLikes[widget.schedule.id]!.add(currentUserId);
-        widget.schedule.likes++;
+        userLikes.putIfAbsent(widget.item.id, () => {});
+        userLikes[widget.item.id]!.add(currentUserId);
+        widget.item.likes++;
       }
 
       isLiked = !isLiked;
-      widget.onUpdate(widget.schedule); // 변경 사항 전달
+      widget.onUpdate(widget.item); // 변경 사항 전달
     });
   }
 
@@ -87,13 +87,13 @@ class _DetailPageState extends State<DetailPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditSchedulePage(
-                      schedule: widget.schedule,
+                      schedule: widget.item,
                       onUpdate: (updatedSchedule) {
                         // 기존 likes 값을 수정된 스케줄에 반영
-                        updatedSchedule.likes = widget.schedule.likes;
+                        updatedSchedule.likes = widget.item.likes;
 
                         // 기존 userLikes 상태 유지
-                        userLikes[updatedSchedule.id] = userLikes[widget.schedule.id] ?? {};
+                        userLikes[updatedSchedule.id] = userLikes[widget.item.id] ?? {};
 
                         widget.onUpdate(updatedSchedule);
                         Navigator.pop(context); // 수정 후 복귀
@@ -188,7 +188,7 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                           onPressed: toggleLike,
                         ),
-                        Text('${widget.schedule.likes}',
+                        Text('${widget.item.likes}',
                             style: const TextStyle(fontSize: 16)),
                       ],
                     ),
@@ -203,11 +203,11 @@ class _DetailPageState extends State<DetailPage> {
                               backgroundColor: Colors.transparent,
                               builder: (context) {
                                 return CommentPage(
-                                  initialComments: scheduleComments[widget.schedule.id]!,
+                                  initialComments: itemComments[widget.item.id]!,
                                   onCommentsUpdated: (updatedComments) {
                                     // 댓글 리스트를 업데이트하여 전역 상태에 반영
                                     setState(() {
-                                      scheduleComments[widget.schedule.id] = updatedComments;
+                                      itemComments[widget.item.id] = updatedComments;
                                     });
                                   },
                                 );
@@ -216,7 +216,7 @@ class _DetailPageState extends State<DetailPage> {
                           },
                         ),
                         Text(
-                            '${scheduleComments[widget.schedule.id]?.length ?? 0}',
+                            '${itemComments[widget.item.id]?.length ?? 0}',
                             style: const TextStyle(fontSize: 16)
                         )
                       ],
