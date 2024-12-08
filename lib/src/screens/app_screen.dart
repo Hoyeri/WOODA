@@ -72,7 +72,6 @@ class _AppScreenState extends State<AppScreen> {
             selectedDate.day,
           );
 
-          _loadCurrentUserId();
 
           return item.user_id == currentUserId && itemDate == selectedDateOnly;
         }).toList();
@@ -90,6 +89,7 @@ class _AppScreenState extends State<AppScreen> {
       final result = await _itemsService.updateItem(updatedItem);
       if (result['status'] == 'success') {
         // 성공 시 UI 갱신
+        _loadCurrentUserId();
         await _loadItems(selectedDay);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Item updated successfully")),
