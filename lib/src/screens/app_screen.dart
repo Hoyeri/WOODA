@@ -55,26 +55,12 @@ class _AppScreenState extends State<AppScreen> {
   }
 
   Future<void> _loadItems(DateTime selectedDate) async {
+    if (currentUserId == null) return; // 사용자 ID가 없으면 실행하지 않음
     try {
       final data = await _itemsService.getItemsByDate(selectedDate);
 
-      // 사용자 ID와 선택된 날짜를 기준으로 항목 필터링
       setState(() {
-        items = data.where((item) {
-          final itemDate = DateTime(
-            item.date.year,
-            item.date.month,
-            item.date.day,
-          );
-          final selectedDateOnly = DateTime(
-            selectedDate.year,
-            selectedDate.month,
-            selectedDate.day,
-          );
-
-
-          return item.user_id == currentUserId && itemDate == selectedDateOnly;
-        }).toList();
+        items = data.where((item) => item.user_id == currentUserId).toList();
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +68,7 @@ class _AppScreenState extends State<AppScreen> {
       );
     }
   }
+
 
 
   Future<void> _updateItem(Item updatedItem) async {
