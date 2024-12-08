@@ -6,16 +6,24 @@ class AuthService {
 
   AuthService(this.apiClient);
 
-  Future<String> getUsername(int id) async {
-    final response = await apiClient.post('/auth/getUsername/$id', {'id': id});
-    if (response.statusCode == 201) {
+  Future<String> getUsername() async {
+    final response = await apiClient.get('/auth/getUsername');
+    if (response.statusCode == 200) {
       return response.body;
-    } else if (response.statusCode == 409) {
-      return "Username already exists";
     } else {
       return response.body;
     }
   }
+
+  Future<String> getId() async {
+    final response = await apiClient.get('/auth/getId');
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      return response.body;
+    }
+  }
+
   Future<Map<String, dynamic>> register(String username, String password) async {
     final response = await apiClient.post('/auth/register', {
       'username': username,
@@ -48,3 +56,4 @@ class AuthService {
     }
   }
 }
+

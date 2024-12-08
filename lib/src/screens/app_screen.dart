@@ -10,6 +10,7 @@ import 'package:wooda_client/src/models/detail_page_model.dart';
 import 'package:wooda_client/src/screens/date_time_selection_page.dart';
 import 'package:wooda_client/src/screens/add_schedule_page.dart';
 import 'package:wooda_client/src/services/items_service.dart';
+import 'package:wooda_client/src/services/auth_service.dart';
 import 'package:wooda_client/src/services/friends_service.dart';
 import 'package:wooda_client/src/screens/friends_page.dart';
 import 'package:wooda_client/src/models/items_model.dart';
@@ -30,18 +31,51 @@ class _AppScreenState extends State<AppScreen> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
   List<dynamic> items = [];
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
     _loadItems(selectedDay);
+    _loadCurrentUserId();
+  }
+
+  Future<void> _loadCurrentUserId() async {
+    try {
+      final id = await AuthService(apiClient).getId(); // AuthService의 getId 호출
+      setState(() {
+        currentUserId = id; // 현재 사용자 ID 저장
+      });
+      _loadItems(selectedDay); // 사용자 ID 로드 후 항목 불러오기
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("사용자 ID 로드 실패: $e")),
+      );
+    }
   }
 
   Future<void> _loadItems(DateTime selectedDate) async {
     try {
       final data = await _itemsService.getItemsByDate(selectedDate);
+
+      // 사용자 ID와 선택된 날짜를 기준으로 항목 필터링
       setState(() {
-        items = data;
+        items = data.where((item) {
+          final itemDate = DateTime(
+            item.date.year,
+            item.date.month,
+            item.date.day,
+          );
+          final selectedDateOnly = DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            selectedDate.day,
+          );
+
+          _loadCurrentUserId();
+
+          return item.user_id == currentUserId && itemDate == selectedDateOnly;
+        }).toList();
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -49,6 +83,7 @@ class _AppScreenState extends State<AppScreen> {
       );
     }
   }
+
 
   Future<void> _updateItem(Item updatedItem) async {
     try {
