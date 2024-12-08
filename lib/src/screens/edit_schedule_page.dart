@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wooda_client/src/models/items_model.dart';
@@ -186,11 +188,18 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (_imagePath != null)
+                        if (_imagePath != null && _imagePath!.isNotEmpty)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
+                            child: _imagePath!.startsWith('http') // 네트워크 URL인지 확인
+                                ? Image.network(
                               _imagePath!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 400,
+                            )
+                                : Image.file(
+                              File(_imagePath!), // 로컬 파일 경로로 처리
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: 400,
